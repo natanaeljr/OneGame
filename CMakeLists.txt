@@ -59,11 +59,11 @@ find_library(Zlib_LIBRARY NAMES zlibstatic zlibstaticd)
 # Project
 #########################################################################################
 # Main target binary
-add_executable(main)
-target_sources(main PRIVATE
-    src/main.cpp
+add_library(FirstGame STATIC)
+target_sources(FirstGame PRIVATE
+        src/firstgame.cpp
 )
-target_link_libraries(main PRIVATE
+target_link_libraries(FirstGame PRIVATE
     glm::glm_static
     imgui::imgui
     OpenGL::GL
@@ -72,5 +72,5 @@ target_link_libraries(main PRIVATE
     ${IrrXML_LIBRARY}
     ${Zlib_LIBRARY}
 )
-target_include_directories(main PRIVATE src/include PUBLIC include)
-install(TARGETS main)
+target_include_directories(FirstGame PRIVATE src/include PUBLIC include)
+install(TARGETS FirstGame)
