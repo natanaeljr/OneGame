@@ -11,17 +11,31 @@ TriangleRenderer::TriangleRenderer()
 {
     TRACE("Created TriangleRenderer");
 
-    GLuint buffers[2], &vao = buffers[0], &vbo = buffers[1];
-    glGenBuffers(1, buffers);
-    std::ignore = vao;
-    std::ignore = vbo;
+    static constexpr GLfloat vertices[] = {
+        -0.5f, -0.5f, +0.0f,  //
+        +0.0f, +0.5f, +0.0f,  //
+        +0.5f, -0.5f, +0.0f,  //
+    };
+
+    glGenVertexArrays(1, &vao_);
+    glGenBuffers(1, &vbo_);
+
+    glBindVertexArray(vao_);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
+    glEnableVertexAttribArray(0);
+
+    glBindVertexArray(0);
 }
 
 /**************************************************************************************************/
 
 TriangleRenderer::~TriangleRenderer()
 {
-    // TODO: Delete VAO, VBO, EBO
+    glDeleteBuffers(1, &vbo_);
+    glDeleteVertexArrays(1, &vao_);
+
     TRACE("Destroyed TriangleRenderer");
 }
 
@@ -29,7 +43,8 @@ TriangleRenderer::~TriangleRenderer()
 
 void TriangleRenderer::Render()
 {
-    // TODO: Draw Triangle
+    glBindVertexArray(vao_);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 }  // namespace firstgame::renderer

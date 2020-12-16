@@ -17,7 +17,8 @@
 #define INFO(...) SPDLOG_LOGGER_INFO(::firstgame::system::Logger::current().handle(), __VA_ARGS__)
 #define WARN(...) SPDLOG_LOGGER_WARN(::firstgame::system::Logger::current().handle(), __VA_ARGS__)
 #define ERROR(...) SPDLOG_LOGGER_ERROR(::firstgame::system::Logger::current().handle(), __VA_ARGS__)
-#define CRITICAL(...) SPDLOG_LOGGER_CRITICAL(::firstgame::system::Logger::current(), __VA_ARGS__)
+#define CRITICAL(...) \
+    SPDLOG_LOGGER_CRITICAL(::firstgame::system::Logger::current().handle(), __VA_ARGS__)
 
 #ifndef NDEBUG
 #define ASSERT(cond)                                   \

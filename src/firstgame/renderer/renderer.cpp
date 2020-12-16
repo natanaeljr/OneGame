@@ -38,10 +38,8 @@ void main() {
     FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
 }
 )";
-          auto shader = opengl::Shader::Build(vextex_src, fragment_src);
-          if (not shader) {
-              TRACE("Failed to create Shader!");
-          }
+          auto shader = opengl::Shader::Build(vextex_src.data(), fragment_src.data());
+          ASSERT(shader);
           return shader;
       }())
 {
@@ -59,7 +57,11 @@ RendererImpl::~RendererImpl()
 
 void RendererImpl::Render()
 {
+    glUseProgram(shader_->program);
+
     triangle_.Render();
+
+    glUseProgram(0);
 }
 
 /**************************************************************************************************/
