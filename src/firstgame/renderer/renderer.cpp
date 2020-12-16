@@ -2,12 +2,15 @@
 
 #include <new>
 #include "triangle_renderer.h"
+#include "firstgame/opengl/gl.h"
+#include "firstgame/opengl/shader.h"
 #include "firstgame/system/log.h"
 
 namespace firstgame::renderer {
 
 /**************************************************************************************************/
 
+//! Renderer Implementation
 class RendererImpl final {
    public:
     RendererImpl();
@@ -15,12 +18,32 @@ class RendererImpl final {
     void Render();
 
    private:
+    util::Scoped<opengl::Shader> shader_;
     TriangleRenderer triangle_;
 };
 
 /**************************************************************************************************/
 
 RendererImpl::RendererImpl()
+    : shader_([] {
+          static constexpr std::string_view vextex_src = R"(#version 330 core
+layout (location = 0) in vec3 position;
+void main() {
+    gl_Position = vec4(position, 1.0);
+}
+)";
+          static constexpr std::string_view fragment_src = R"(#version 330 core
+out vec4 FragColor;
+void main() {
+    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
+}
+)";
+          auto shader = opengl::Shader::Build(vextex_src, fragment_src);
+          if (not shader) {
+              TRACE("Failed to create Shader!");
+          }
+          return std::move(*shader);
+      }())
 {
     TRACE("Created RendererImpl");
 }

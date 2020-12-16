@@ -48,7 +48,7 @@ void FirstGameImpl::Update(unsigned int timestep)
 
 void FirstGameImpl::OnImGuiRender()
 {
-    ImGui::ShowDemoWindow();
+    // ImGui::ShowDemoWindow();
 }
 
 /**************************************************************************************************/
