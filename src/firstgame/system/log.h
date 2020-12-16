@@ -12,34 +12,12 @@
 
 /**************************************************************************************************/
 
-#define TRACE(...)                                                                     \
-    SPDLOG_LOGGER_TRACE(                                                               \
-        ::firstgame::util::Currenton<::firstgame::system::Logger>::current().handle(), \
-        __VA_ARGS__)
-
-#define DEBUG(...)                                                                     \
-    SPDLOG_LOGGER_DEBUG(                                                               \
-        ::firstgame::util::Currenton<::firstgame::system::Logger>::current().handle(), \
-        __VA_ARGS__)
-
-#define INFO(...)                                                                      \
-    SPDLOG_LOGGER_INFO(                                                                \
-        ::firstgame::util::Currenton<::firstgame::system::Logger>::current().handle(), \
-        __VA_ARGS__)
-
-#define WARN(...)                                                                      \
-    SPDLOG_LOGGER_WARN(                                                                \
-        ::firstgame::util::Currenton<::firstgame::system::Logger>::current().handle(), \
-        __VA_ARGS__)
-
-#define ERROR(...)                                                                     \
-    SPDLOG_LOGGER_ERROR(                                                               \
-        ::firstgame::util::Currenton<::firstgame::system::Logger>::current().handle(), \
-        __VA_ARGS__)
-
-#define CRITICAL(...)                                                                            \
-    SPDLOG_LOGGER_CRITICAL(::firstgame::util::Currenton<::firstgame::system::Logger>::current(), \
-                           __VA_ARGS__)
+#define TRACE(...) SPDLOG_LOGGER_TRACE(::firstgame::system::Logger::current().handle(), __VA_ARGS__)
+#define DEBUG(...) SPDLOG_LOGGER_DEBUG(::firstgame::system::Logger::current().handle(), __VA_ARGS__)
+#define INFO(...) SPDLOG_LOGGER_INFO(::firstgame::system::Logger::current().handle(), __VA_ARGS__)
+#define WARN(...) SPDLOG_LOGGER_WARN(::firstgame::system::Logger::current().handle(), __VA_ARGS__)
+#define ERROR(...) SPDLOG_LOGGER_ERROR(::firstgame::system::Logger::current().handle(), __VA_ARGS__)
+#define CRITICAL(...) SPDLOG_LOGGER_CRITICAL(::firstgame::system::Logger::current(), __VA_ARGS__)
 
 #ifndef NDEBUG
 #define ASSERT(cond)                                   \
@@ -53,7 +31,6 @@
 #define ASSERT(cond) (void) 0;
 #endif
 
-/**************************************************************************************************/
 /**************************************************************************************************/
 
 namespace firstgame::system {
