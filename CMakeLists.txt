@@ -10,6 +10,12 @@ project(FirstGame LANGUAGES CXX)
 #  cmake .. -DCMAKE_PREFIX_PATH=$(realpath ../../build/external)
 
 #########################################################################################
+# Options
+#########################################################################################
+option(FIRSTGAME_OPENGL_ES_3 "OpenGL ES 3.0" OFF)
+option(FIRSTGAME_OPENGL_LOADER_GLAD "OpenGL Loader GLAD" OFF)
+
+#########################################################################################
 # Configuration
 #########################################################################################
 # Default build type to Debug, for release use `cmake -DCMAKE_BUILD_TYPE=Release ..`
@@ -59,10 +65,10 @@ find_library(Zlib_LIBRARY NAMES zlibstatic zlibstaticd)
 # Project
 #########################################################################################
 # Main target binary
-add_library(FirstGame STATIC)
-target_sources(FirstGame PRIVATE
-        src/firstgame.cpp
-)
+add_library(FirstGame STATIC
+    src/firstgame/firstgame.cpp
+    src/firstgame/renderer/renderer.cpp
+    src/firstgame/renderer/triangle_renderer.cpp)
 target_link_libraries(FirstGame PUBLIC
     glm::glm_static
     imgui::imgui
@@ -72,7 +78,11 @@ target_link_libraries(FirstGame PUBLIC
     ${IrrXML_LIBRARY}
     ${Zlib_LIBRARY}
 )
-target_include_directories(FirstGame PRIVATE src/include PUBLIC include)
+target_include_directories(FirstGame PRIVATE src PUBLIC include)
+target_compile_definitions(FirstGame PRIVATE
+    FIRSTGAME_DUMMY_DEFINE
+    $<$<BOOL:${FIRSTGAME_OPENGL_ES_3}>:FIRSTGAME_OPENGL_ES_3>
+    $<$<BOOL:${FIRSTGAME_OPENGL_LOADER_GLAD}>:FIRSTGAME_OPENGL_LOADER_GLAD>)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 target_compile_definitions(FirstGame PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
