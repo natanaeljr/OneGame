@@ -54,6 +54,7 @@
 #endif
 
 /**************************************************************************************************/
+/**************************************************************************************************/
 
 namespace firstgame::system {
 
@@ -63,10 +64,6 @@ class Logger final : public util::Currenton<Logger> {
     ~Logger() override = default;
 
     [[nodiscard]] auto& handle() { return logger_; }
-    operator std::shared_ptr<spdlog::logger>&()  // NOLINT(google-explicit-constructor)
-    {
-        return logger_;
-    }
 
    private:
     std::shared_ptr<spdlog::logger> logger_;
