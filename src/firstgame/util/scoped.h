@@ -27,6 +27,14 @@ class Scoped final {
 
     [[nodiscard]] explicit operator bool() const noexcept { return init; }
 
+    void reset()
+    {
+        if (init) {
+            reinterpret_cast<T*>(object)->~T();
+        }
+        init = false;
+    }
+
     Scoped(Scoped<T>&& other) noexcept : init(other.init)
     {
         if (other.init) {
@@ -50,12 +58,7 @@ class Scoped final {
     Scoped(const Scoped<T>&) = delete;
     Scoped& operator=(const Scoped<T>&) = delete;
 
-    ~Scoped()
-    {
-        if (init) {
-            reinterpret_cast<T*>(object)->~T();
-        }
-    }
+    ~Scoped() { reset(); }
 
    private:
     explicit Scoped(bool init) : init(init) {}

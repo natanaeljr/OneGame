@@ -3,7 +3,6 @@
 
 #include <cstring>
 #include <new>
-#include <optional>
 #include <string_view>
 #include "firstgame/opengl/gl.h"
 #include "firstgame/system/log.h"
@@ -17,7 +16,7 @@ struct Shader {
    public:
     GLuint program;
     static auto Build(std::string_view vextex_src, std::string_view fragment_src)
-        -> std::optional<util::Scoped<Shader>>;
+        -> util::Scoped<Shader>;
 
     Shader() : program(glCreateProgram()) { TRACE("Created Shader {}", program); }
     ~Shader()
@@ -35,7 +34,7 @@ struct Shader {
 /**************************************************************************************************/
 
 auto Shader::Build(std::string_view vextex_src, std::string_view fragment_src)
-    -> std::optional<util::Scoped<Shader>>
+    -> util::Scoped<Shader>
 {
     glCreateShader(GL_VERTEX_SHADER);
 

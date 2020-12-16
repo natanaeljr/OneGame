@@ -42,7 +42,7 @@ void main() {
           if (not shader) {
               TRACE("Failed to create Shader!");
           }
-          return std::move(*shader);
+          return shader;
       }())
 {
     TRACE("Created RendererImpl");
