@@ -21,14 +21,16 @@
     SPDLOG_LOGGER_CRITICAL(::firstgame::system::Logger::current().handle(), __VA_ARGS__)
 
 #ifndef NDEBUG
-#define ASSERT(cond)                                   \
-    do {                                               \
-        if (!(cond)) {                                 \
-            CRITICAL("Assertion failed: ({})", #cond); \
-            abort();                                   \
-        }                                              \
+#define ASSERT_MSG(cond, ...)      \
+    do {                           \
+        if (!(cond)) {             \
+            CRITICAL(__VA_ARGS__); \
+            abort();               \
+        }                          \
     } while (0)
+#define ASSERT(cond) ASSERT_MSG(cond, "Assertion failed: ({})", #cond)
 #else
+#define ASSERT_MSG(cond, ...) (void) 0;
 #define ASSERT(cond) (void) 0;
 #endif
 

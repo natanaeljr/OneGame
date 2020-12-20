@@ -3,6 +3,7 @@
 
 #include <cstring>
 #include <memory>
+#include <gsl/gsl_util>
 #include "firstgame/opengl/gl.h"
 #include "firstgame/system/log.h"
 #include "firstgame/util/scoped.h"
@@ -27,19 +28,28 @@ struct Shader final {
     Shader& operator=(Shader&&) = delete;
     Shader& operator=(const Shader&) = delete;
 
+    static const char* Str(GLenum shader_type);
+
    private:
     static GLuint Compile(GLenum shader_type, const char* shader_src);
-    bool Link(GLuint vertex_shader, GLuint fragment_shader);
+    [[nodiscard]] bool Link(GLuint vertex_shader, GLuint fragment_shader) const;
 };
 
 /**************************************************************************************************/
 
 auto Shader::Build(const char* vertex_src, const char* fragment_src) -> util::Scoped<Shader>
 {
+    GLuint vertex = Shader::Compile(GL_VERTEX_SHADER, vertex_src);
+    auto $1 = gsl::finally([=] { glDeleteShader(vertex); });
+    GLuint fragment = Shader::Compile(GL_FRAGMENT_SHADER, fragment_src);
+    auto $2 = gsl::finally([=] { glDeleteShader(fragment); });
+    if (not vertex || not fragment) {
+        ERROR("Failed to Compile Shaders");
+        return {};
+    }
     auto shader = util::make_scoped<Shader>();
-    if (not shader->Link(Compile(GL_VERTEX_SHADER, vertex_src),
-                         Compile(GL_FRAGMENT_SHADER, fragment_src))) {
-        ERROR("Failed to build Shader");
+    if (not shader->Link(vertex, fragment)) {
+        ERROR("Failed to Link Shader Program");
         return {};
     }
     return shader;
@@ -60,7 +70,7 @@ GLuint Shader::Compile(GLenum shader_type, const char* shader_src)
         if (info_len) {
             auto info = std::unique_ptr<char[]>(new char[info_len]);
             glGetShaderInfoLog(shader, info_len, nullptr, info.get());
-            ERROR("Failed to Compile Shader [{}]: {}", shader_type, info.get());
+            ERROR("Failed to Compile Shader [{}]:\n{}", Shader::Str(shader_type), info.get());
         }
         glDeleteShader(shader);
         shader = 0;
@@ -70,7 +80,7 @@ GLuint Shader::Compile(GLenum shader_type, const char* shader_src)
 
 /**************************************************************************************************/
 
-bool Shader::Link(GLuint vertex_shader, GLuint fragment_shader)
+bool Shader::Link(GLuint vertex_shader, GLuint fragment_shader) const
 {
     glAttachShader(program, vertex_shader);
     glAttachShader(program, fragment_shader);
@@ -85,9 +95,27 @@ bool Shader::Link(GLuint vertex_shader, GLuint fragment_shader)
             glGetProgramInfoLog(program, info_len, nullptr, info.get());
             ERROR("Failed to Link Program: {}", info.get());
         }
-        return false;
     }
-    return true;
+    glDetachShader(program, fragment_shader);
+    glDetachShader(program, vertex_shader);
+    return link_status;
+}
+
+/**************************************************************************************************/
+
+const char* Shader::Str(GLenum shader_type)
+{
+    switch (shader_type) {
+        case GL_VERTEX_SHADER:
+            return "GL_VERTEX_SHADER";
+        case GL_FRAGMENT_SHADER:
+            return "GL_FRAGMENT_SHADER";
+        case GL_GEOMETRY_SHADER:
+            return "GL_GEOMETRY_SHADER";
+        default:
+            ASSERT_MSG(0, "Invalid shader type {}", shader_type);
+            return "<invalid>";
+    }
 }
 
 }  // namespace firstgame::opengl

@@ -41,7 +41,7 @@ void main() {
 }
 )";
           auto shader = opengl::Shader::Build(vextex_src.data(), fragment_src.data());
-          ASSERT(shader);
+          ASSERT(shader.exists());
           return shader;
       }())
 {

@@ -7,7 +7,7 @@
 
 namespace firstgame::util {
 
-template<typename T>
+template<typename T, typename Destructor = void>
 class Scoped final {
    public:
     Scoped() = default;
@@ -25,22 +25,22 @@ class Scoped final {
         return *reinterpret_cast<T*>(object);
     }
 
-    [[nodiscard]] explicit operator bool() const noexcept { return init; }
+    [[nodiscard]] bool exists() const noexcept { return init; }
+    [[nodiscard]] explicit operator bool() const noexcept { return exists(); }
 
     void reset()
     {
         if (init) {
             reinterpret_cast<T*>(object)->~T();
+            init = false;
         }
-        init = false;
     }
 
-    Scoped(Scoped<T>&& other) noexcept : init(other.init)
+    Scoped(Scoped<T>&& other) noexcept : init(std::exchange(other.init, false))
     {
-        if (other.init) {
+        if (init) {
             std::memcpy(this->object, other.object, sizeof(T));
         }
-        other.init = false;
     }
     Scoped& operator=(Scoped<T>&& other) noexcept
     {
@@ -58,7 +58,12 @@ class Scoped final {
     Scoped(const Scoped<T>&) = delete;
     Scoped& operator=(const Scoped<T>&) = delete;
 
-    ~Scoped() { reset(); }
+    ~Scoped()
+    {
+        if (init) {
+            reinterpret_cast<T*>(object)->~T();
+        }
+    }
 
    private:
     explicit Scoped(bool init) : init(init) {}
