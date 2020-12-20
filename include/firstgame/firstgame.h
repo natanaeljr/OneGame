@@ -6,7 +6,7 @@
 
 namespace firstgame {
 
-// Game Interface
+/// Game Interface
 class FirstGame {
    public:
     static auto New(std::shared_ptr<spdlog::logger> logger) -> std::unique_ptr<FirstGame>;
@@ -16,6 +16,9 @@ class FirstGame {
     virtual void OnEvent(const class Event& event) = 0;
     // Destructor
     virtual ~FirstGame() = default;
+
+   protected:
+    FirstGame() = default;
 };
 
 }  // namespace firstgame
