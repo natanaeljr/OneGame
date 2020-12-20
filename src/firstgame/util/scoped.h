@@ -76,7 +76,7 @@ class Scoped final {
 
    private:
     bool init = false;
-    unsigned char object[sizeof(T)];
+    alignas(T) unsigned char object[sizeof(T)];
 };
 
 template<typename T, typename... Args>

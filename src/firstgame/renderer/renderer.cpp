@@ -1,10 +1,12 @@
 #include "renderer.h"
 
 #include <new>
+#include <string_view>
 #include "triangle_renderer.h"
 #include "firstgame/opengl/gl.h"
 #include "firstgame/opengl/shader.h"
 #include "firstgame/system/log.h"
+#include "firstgame/util/scoped.h"
 
 namespace firstgame::renderer {
 
@@ -69,6 +71,8 @@ void RendererImpl::Render()
 
 Renderer::Renderer()
 {
+    // guarantee same memory alignment of the interface and implementation
+    static_assert(alignof(Renderer) == alignof(RendererImpl));
     // guarantee enough space in the implementation object buffer
     static_assert(sizeof(impl_) == sizeof(RendererImpl));
     // placement new

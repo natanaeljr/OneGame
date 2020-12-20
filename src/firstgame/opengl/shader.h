@@ -2,9 +2,7 @@
 #define FIRSTGAME_OPENGL_SHADER_H_
 
 #include <cstring>
-#include <new>
 #include <memory>
-#include <string_view>
 #include "firstgame/opengl/gl.h"
 #include "firstgame/system/log.h"
 #include "firstgame/util/scoped.h"
@@ -13,7 +11,7 @@ namespace firstgame::opengl {
 
 /**************************************************************************************************/
 
-struct Shader {
+struct Shader final {
     GLuint program;
     static auto Build(const char* vertex_src, const char* fragment_src) -> util::Scoped<Shader>;
 
