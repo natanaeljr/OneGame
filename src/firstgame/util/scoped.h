@@ -31,6 +31,12 @@ class Scoped<T> final {
     [[nodiscard]] bool exists() const noexcept { return init; }
     [[nodiscard]] explicit operator bool() const noexcept { return exists(); }
 
+    std::add_rvalue_reference_t<T> release()
+    {
+        init = false;
+        return std::move(*reinterpret_cast<T*>(object));
+    }
+
     void reset()
     {
         if (init) {
@@ -113,6 +119,12 @@ class Scoped final {
 
     [[nodiscard]] bool exists() const noexcept { return init; }
     [[nodiscard]] explicit operator bool() const noexcept { return exists(); }
+
+    std::add_rvalue_reference_t<T> release()
+    {
+        init = false;
+        return std::move(*reinterpret_cast<T*>(object));
+    }
 
     void reset()
     {
