@@ -31,7 +31,8 @@ struct Shader final {
     static const char* Str(GLenum shader_type);
 
    private:
-    static GLuint Compile(GLenum shader_type, const char* shader_src);
+    static auto Compile(GLenum shader_type, const char* shader_src)
+        -> util::Scoped<GLuint, std::decay_t<decltype(glDeleteShader)>>;
     [[nodiscard]] bool Link(GLuint vertex_shader, GLuint fragment_shader) const;
 };
 
@@ -39,16 +40,14 @@ struct Shader final {
 
 auto Shader::Build(const char* vertex_src, const char* fragment_src) -> util::Scoped<Shader>
 {
-    GLuint vertex = Shader::Compile(GL_VERTEX_SHADER, vertex_src);
-    auto $1 = gsl::finally([=] { glDeleteShader(vertex); });
-    GLuint fragment = Shader::Compile(GL_FRAGMENT_SHADER, fragment_src);
-    auto $2 = gsl::finally([=] { glDeleteShader(fragment); });
+    auto vertex = Shader::Compile(GL_VERTEX_SHADER, vertex_src);
+    auto fragment = Shader::Compile(GL_FRAGMENT_SHADER, fragment_src);
     if (not vertex || not fragment) {
         ERROR("Failed to Compile Shaders");
         return {};
     }
     auto shader = util::make_scoped<Shader>();
-    if (not shader->Link(vertex, fragment)) {
+    if (not shader->Link(vertex.get(), fragment.get())) {
         ERROR("Failed to Link Shader Program");
         return {};
     }
@@ -57,7 +56,8 @@ auto Shader::Build(const char* vertex_src, const char* fragment_src) -> util::Sc
 
 /**************************************************************************************************/
 
-GLuint Shader::Compile(GLenum shader_type, const char* shader_src)
+auto Shader::Compile(GLenum shader_type, const char* shader_src)
+    -> util::Scoped<GLuint, std::decay_t<decltype(glDeleteShader)>>
 {
     GLuint shader = glCreateShader(shader_type);
     glShaderSource(shader, 1, &shader_src, nullptr);
@@ -73,9 +73,9 @@ GLuint Shader::Compile(GLenum shader_type, const char* shader_src)
             ERROR("Failed to Compile Shader [{}]:\n{}", Shader::Str(shader_type), info.get());
         }
         glDeleteShader(shader);
-        shader = 0;
+        return {};
     }
-    return shader;
+    return util::make_scoped_final<GLuint>(glDeleteShader, shader);
 }
 
 /**************************************************************************************************/
