@@ -178,9 +178,10 @@ class Scoped final {
     friend Scoped<U, std::decay_t<F>> make_scoped_final(F&&, Args&&...);
 
    private:
+    // this declaration order is important for alignment
     bool init;
-    Final final_;
     alignas(T) unsigned char object[sizeof(T)];
+    Final final_;
 };
 
 template<typename T, typename Final, typename... Args>

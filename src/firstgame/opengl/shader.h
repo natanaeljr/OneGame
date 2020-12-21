@@ -47,7 +47,7 @@ auto Shader::Build(const char* vertex_src, const char* fragment_src) -> util::Sc
         return {};
     }
     auto shader = util::make_scoped<Shader>();
-    if (not shader->Link(vertex.get(), fragment.get())) {
+    if (not shader->Link(*vertex, *fragment)) {
         ERROR("Failed to Link Shader Program");
         return {};
     }
