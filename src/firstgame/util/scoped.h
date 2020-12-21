@@ -15,8 +15,8 @@ class Scoped<T> final {
    public:
     Scoped() = default;
 
-    [[nodiscard]] T* get() noexcept { return reinterpret_cast<T*>(object); }
-    [[nodiscard]] const T* get() const noexcept { return reinterpret_cast<T*>(object); }
+    [[nodiscard]] T& get() noexcept { return reinterpret_cast<T*>(object); }
+    [[nodiscard]] const T& get() const noexcept { return reinterpret_cast<T*>(object); }
     [[nodiscard]] T* operator->() noexcept { return reinterpret_cast<T*>(object); }
     [[nodiscard]] const T* operator->() const noexcept { return reinterpret_cast<T*>(object); }
     [[nodiscard]] typename std::add_lvalue_reference<T>::type operator*()
