@@ -1,7 +1,7 @@
 #ifndef FIRSTGAMELINUX_TRIANGLE_RENDERER_H_
 #define FIRSTGAMELINUX_TRIANGLE_RENDERER_H_
 
-#include <glad/glad.h>
+#include "firstgame/opengl/gl.h"
 
 namespace firstgame::renderer {
 

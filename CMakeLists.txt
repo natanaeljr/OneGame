@@ -18,8 +18,9 @@ project(FirstGame LANGUAGES CXX)
 #########################################################################################
 # Options
 #########################################################################################
-option(FIRSTGAME_OPENGL_ES_3 "OpenGL ES 3.0" OFF)
-option(FIRSTGAME_OPENGL_LOADER_GLAD "OpenGL Loader GLAD" OFF)
+option(FIRSTGAME_OPENGL_ES3        "OpenGL ES 3.0"            OFF)
+option(FIRSTGAME_OPENGL_GLAD       "OpenGL Loader GLAD"       OFF)
+option(FIRSTGAME_OPENGL_GLBINDING3 "OpenGL API C++ glbinding" OFF)
 
 #########################################################################################
 # Configuration
@@ -47,12 +48,16 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 #########################################################################################
 # Dependencies
 #########################################################################################
-# OpenGL for graphics library
-find_package(OpenGL REQUIRED)
-if(${FIRSTGAME_OPENGL_LOADER_GLAD})
 # GLAD for opengl function loader
+if(${FIRSTGAME_OPENGL_GLAD})
 find_package(glad 0.1.34 EXACT REQUIRED)
 endif()
+# GLBinding for C++ binding of the OpenGL API
+if(${FIRSTGAME_OPENGL_GLBINDING3})
+find_package(glbinding REQUIRED)
+endif()
+# OpenGL for graphics library
+find_package(OpenGL REQUIRED)
 # SPDLog for fast C++ logging library
 find_package(spdlog 1.8.1 EXACT REQUIRED)
 # GSL for types and functions of C++ Core Guidelines
@@ -75,10 +80,12 @@ find_library(Zlib_LIBRARY NAMES zlibstatic zlibstaticd)
 # Project
 #########################################################################################
 # Main target binary
-add_library(FirstGame STATIC
+add_library(FirstGame STATIC)
+target_sources(FirstGame PRIVATE
     src/firstgame/firstgame.cpp
     src/firstgame/renderer/renderer.cpp
-    src/firstgame/renderer/triangle_renderer.cpp)
+    src/firstgame/renderer/triangle_renderer.cpp
+)
 target_link_libraries(FirstGame PUBLIC
     Microsoft.GSL::GSL
     spdlog::spdlog
@@ -88,11 +95,18 @@ target_link_libraries(FirstGame PUBLIC
     assimp::assimp
     ${IrrXML_LIBRARY}
     ${Zlib_LIBRARY}
+    $<$<BOOL:${FIRSTGAME_OPENGL_GLAD}>:glad::glad>
+    $<$<BOOL:${FIRSTGAME_OPENGL_GLBINDING3}>:glbinding::glbinding>
+    $<$<BOOL:${FIRSTGAME_OPENGL_GLBINDING3}>:glbinding::glbinding-aux>
+    OpenGL::GL
 )
 target_include_directories(FirstGame PRIVATE src PUBLIC include)
 target_compile_definitions(FirstGame PRIVATE
-    $<$<BOOL:${FIRSTGAME_OPENGL_ES_3}>:FIRSTGAME_OPENGL_ES_3>
-    $<$<BOOL:${FIRSTGAME_OPENGL_LOADER_GLAD}>:FIRSTGAME_OPENGL_LOADER_GLAD>
-    SPDLOG_ACTIVE_LEVEL=$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>,SPDLOG_LEVEL_TRACE,SPDLOG_LEVEL_INFO>)
+    GLFW_INCLUDE_NONE
+    $<$<BOOL:${FIRSTGAME_OPENGL_ES3}>:FIRSTGAME_OPENGL_ES3>
+    $<$<BOOL:${FIRSTGAME_OPENGL_GLAD}>:FIRSTGAME_OPENGL_GLAD>
+    $<$<BOOL:${FIRSTGAME_OPENGL_GLBINDING3}>:FIRSTGAME_OPENGL_GLBINDING3>
+    SPDLOG_ACTIVE_LEVEL=$<IF:$<STREQUAL:${CMAKE_BUILD_TYPE},Debug>,SPDLOG_LEVEL_TRACE,SPDLOG_LEVEL_INFO>
+)
 
 install(TARGETS FirstGame)

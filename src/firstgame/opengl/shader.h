@@ -85,7 +85,7 @@ bool Shader::Link(GLuint vertex_shader, GLuint fragment_shader) const
     glAttachShader(program, vertex_shader);
     glAttachShader(program, fragment_shader);
     glLinkProgram(program);
-    GLint link_status = GL_FALSE;
+    GLint link_status = 0;
     glGetProgramiv(program, GL_LINK_STATUS, &link_status);
     if (!link_status) {
         GLint info_len = 0;
