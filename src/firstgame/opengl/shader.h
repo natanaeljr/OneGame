@@ -4,7 +4,7 @@
 #include <cstring>
 #include <memory>
 #include <gsl/gsl_util>
-#include "firstgame/opengl/gl.h"
+#include "firstgame/opengl/gl/gl.h"
 #include "firstgame/system/log.h"
 #include "firstgame/util/scoped.h"
 

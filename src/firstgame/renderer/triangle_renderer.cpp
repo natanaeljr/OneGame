@@ -1,6 +1,6 @@
 #include "triangle_renderer.h"
 
-#include "firstgame/opengl/gl.h"
+#include "firstgame/opengl/gl/gl.h"
 #include "firstgame/system/log.h"
 
 namespace firstgame::renderer {

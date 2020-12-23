@@ -4,10 +4,7 @@
 
 #include "firstgame/firstgame.h"
 
-#include <imgui/imgui.h>
-
 #include "firstgame/event.h"
-#include "firstgame/opengl/gl.h"
 #include "firstgame/system/log.h"
 #include "firstgame/system/system.h"
 #include "firstgame/renderer/renderer.h"
