@@ -1,9 +1,15 @@
 cmake_minimum_required(VERSION 3.5)
 project(FirstGame LANGUAGES CXX)
 
-# This project is can be built as a standalone project on a system with the required
+# This project contains only the game logic build part. Therefore it is intended to be
+# built along with the platform specific code which implements the interface with the
+# underlying operating system.
+
+# The project can be built as a standalone project on a system with the required
 # libraries already installed, or it can be part of the Super-Project which builds all
 # dependencies with the correct versions.
+# For the latter, it is recommend that this directory is included as a sub-directory
+# of the Super-project and the options set accordingly before that.
 # For building it separately with the dependency builds from the Super-Project,
 # the variable `CMAKE_PREFIX_PATH` must be set to the Super-Project's build/external dir.
 # In Linux you can do it as:
@@ -43,12 +49,16 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O2 -DNDEBUG")
 #########################################################################################
 # OpenGL for graphics library
 find_package(OpenGL REQUIRED)
-# ImGui for graphical user interface
-find_package(imgui 1.79 EXACT REQUIRED)
+if(${FIRSTGAME_OPENGL_LOADER_GLAD})
+# GLAD for opengl function loader
+find_package(glad 0.1.34 EXACT REQUIRED)
+endif()
 # SPDLog for fast C++ logging library
 find_package(spdlog 1.8.1 EXACT REQUIRED)
 # GSL for types and functions of C++ Core Guidelines
 find_package(Microsoft.GSL 3.1.0 EXACT REQUIRED)
+# ImGui for graphical user interface
+find_package(imgui 1.79 EXACT REQUIRED)
 # GLM for opengl mathematics library
 find_package(glm 0.9.9.9 EXACT REQUIRED)
 # STB for image loading/decoding
@@ -70,10 +80,11 @@ add_library(FirstGame STATIC
     src/firstgame/renderer/renderer.cpp
     src/firstgame/renderer/triangle_renderer.cpp)
 target_link_libraries(FirstGame PUBLIC
-    glm::glm_static
-    imgui::imgui
-    OpenGL::GL
     Microsoft.GSL::GSL
+    spdlog::spdlog
+    imgui::imgui
+    glm::glm_static
+    stb::stb_image
     assimp::assimp
     ${IrrXML_LIBRARY}
     ${Zlib_LIBRARY}
