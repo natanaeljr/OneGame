@@ -16,7 +16,8 @@ namespace firstgame {
 //! Class that implements the FirstGame interface
 class FirstGameImpl : public FirstGame {
    public:
-    explicit FirstGameImpl(std::shared_ptr<spdlog::logger> logger);
+    explicit FirstGameImpl(std::shared_ptr<spdlog::logger> logger,
+                           std::shared_ptr<platform::FileSystem> filesystem);
     void Update(unsigned int timestep) override;
     void OnImGuiRender() override;
     void OnEvent(const Event& event) override;
@@ -29,7 +30,9 @@ class FirstGameImpl : public FirstGame {
 
 /**************************************************************************************************/
 
-FirstGameImpl::FirstGameImpl(std::shared_ptr<spdlog::logger> logger) : system_(std::move(logger))
+FirstGameImpl::FirstGameImpl(std::shared_ptr<spdlog::logger> logger,
+                             std::shared_ptr<platform::FileSystem> filesystem)
+    : system_(std::move(logger), std::move(filesystem))
 {
     TRACE("Created FirstGameImpl");
 }
@@ -65,9 +68,10 @@ FirstGameImpl::~FirstGameImpl()
 
 /**************************************************************************************************/
 
-auto FirstGame::New(std::shared_ptr<spdlog::logger> logger) -> std::unique_ptr<FirstGame>
+auto FirstGame::New(std::shared_ptr<spdlog::logger> logger,
+                    std::shared_ptr<platform::FileSystem> filesystem) -> std::unique_ptr<FirstGame>
 {
-    return std::make_unique<FirstGameImpl>(std::move(logger));
+    return std::make_unique<FirstGameImpl>(std::move(logger), std::move(filesystem));
 }
 
 }  // namespace firstgame

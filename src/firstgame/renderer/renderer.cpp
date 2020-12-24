@@ -6,6 +6,7 @@
 #include "firstgame/opengl/gl/gl.h"
 #include "firstgame/opengl/shader.h"
 #include "firstgame/system/log.h"
+#include "firstgame/system/asset.h"
 #include "firstgame/util/scoped.h"
 
 namespace firstgame::renderer {
@@ -28,19 +29,14 @@ class RendererImpl final {
 
 RendererImpl::RendererImpl()
     : shader_([] {
-          static constexpr std::string_view vextex_src = R"(#version 330 core
-layout (location = 0) in vec3 position;
-void main() {
-    gl_Position = vec4(position, 1.0);
-}
-)";
-          static constexpr std::string_view fragment_src = R"(#version 330 core
-out vec4 FragColor;
-void main() {
-    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);
-}
-)";
-          auto shader = opengl::Shader::Build(vextex_src.data(), fragment_src.data());
+          auto& asset_mgr = system::AssetManager::current();
+          auto vertex_asset = asset_mgr.Open("shaders/main.vert", 0);
+          auto fragment_asset = asset_mgr.Open("shaders/main.frag", 0);
+          ASSERT(vertex_asset);
+          ASSERT(fragment_asset);
+          std::string vertex_src = vertex_asset->ReadToString();
+          std::string fragment_src = fragment_asset->ReadToString();
+          auto shader = opengl::Shader::Build(vertex_src.data(), fragment_src.data());
           ASSERT(shader.exists());
           return shader;
       }())

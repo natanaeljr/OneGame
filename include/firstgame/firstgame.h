@@ -3,13 +3,15 @@
 
 #include <memory>
 #include <spdlog/logger.h>
+#include "firstgame/platform/filesystem.h"
 
 namespace firstgame {
 
 /// Game Interface
 class FirstGame {
    public:
-    static auto New(std::shared_ptr<spdlog::logger> logger) -> std::unique_ptr<FirstGame>;
+    static auto New(std::shared_ptr<spdlog::logger> logger,
+                    std::shared_ptr<platform::FileSystem> filesystem) -> std::unique_ptr<FirstGame>;
     // Interface
     virtual void Update(unsigned int timestep) = 0;
     virtual void OnImGuiRender() = 0;
