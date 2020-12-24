@@ -6,7 +6,7 @@
 #include "firstgame/opengl/gl.h"
 #include "firstgame/opengl/shader.h"
 #include "firstgame/system/log.h"
-#include "firstgame/system/asset.h"
+#include "firstgame/system/asset_mgr.h"
 #include "firstgame/util/scoped.h"
 #include "firstgame/util/filesystem_literals.h"
 
@@ -32,11 +32,9 @@ RendererImpl::RendererImpl()
     : shader_([] {
           using util::filesystem_literals::operator""_path;
           auto& asset_mgr = system::AssetManager::current();
-          std::string vertex_src =
-              asset_mgr.Open("shaders"_path / "main.vert"_path).Assert()->ReadToString();
-          std::string fragment_src =
-              asset_mgr.Open("shaders"_path / "main.frag"_path).Assert()->ReadToString();
-          return opengl::Shader::Build(vertex_src.data(), fragment_src.data()).Assert();
+          auto vertex = asset_mgr.Open("shaders"_path / "main.vert"_path).Assert()->ReadToString();
+          auto fragment = asset_mgr.Open("shaders"_path / "main.frag"_path).Assert()->ReadToString();
+          return opengl::Shader::Build(vertex.data(), fragment.data()).Assert();
       }())
 {
     TRACE("Created RendererImpl");

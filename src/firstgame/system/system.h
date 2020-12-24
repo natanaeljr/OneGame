@@ -6,7 +6,7 @@
 #define FIRSTGAME_SYSTEM_SYSTEM_H_
 
 #include "log.h"
-#include "asset.h"
+#include "asset_mgr.h"
 #include "firstgame/util/currenton.h"
 #include "firstgame/platform/filesystem.h"
 

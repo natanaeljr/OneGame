@@ -2,12 +2,7 @@
 #define FIRSTGAME_SYSTEM_ASSET_H_
 
 #include <memory>
-#include <string>
-#include <optional>
-
 #include "log.h"
-#include "firstgame/util/scoped.h"
-#include "firstgame/util/currenton.h"
 #include "firstgame/platform/filesystem.h"
 
 namespace firstgame::system {
@@ -16,11 +11,15 @@ namespace firstgame::system {
 class Asset final {
    public:
     // Interface
-    [[nodiscard]] auto ReadToString() -> std::string;
+    [[nodiscard]] auto ReadToString() -> std::string { return file_->ReadToString(); }
 
     // Con/Destructor
-    explicit Asset(std::unique_ptr<platform::File>&& file, std::filesystem::path path);
-    ~Asset();
+    explicit Asset(std::unique_ptr<platform::File>&& file, std::filesystem::path path)
+        : path_(std::move(path)), file_(std::move(file))
+    {
+        TRACE("Asset file opened (\"{}\")", path_.c_str());
+    }
+    ~Asset() { TRACE("Asset file closed (\"{}\")", path_.c_str()); }
 
     // Copy/Move
     Asset(Asset&&) = default;
@@ -33,30 +32,6 @@ class Asset final {
     std::unique_ptr<platform::File> file_;
 };
 
-/// Asset Manager Interface
-class AssetManager final : public util::Currenton<AssetManager> {
-   public:
-    // Interface
-    [[nodiscard]] auto Open(std::filesystem::path assetpath) -> util::Scoped<Asset>;
-
-    // Con/Destructor
-    explicit AssetManager(std::shared_ptr<platform::FileSystem> filesystem)
-        : filesystem_(std::move(filesystem))
-    {
-        TRACE("Initialized AssetManager");
-    }
-    ~AssetManager() override { TRACE("De-initialized AssetManager"); }
-
-    // Copy/Move
-    AssetManager(AssetManager&&) = default;
-    AssetManager(const AssetManager&) = delete;
-    AssetManager& operator=(AssetManager&&) = default;
-    AssetManager& operator=(const AssetManager&) = delete;
-
-   private:
-    std::shared_ptr<platform::FileSystem> filesystem_;
-};
-
 }  // namespace firstgame::system
 
-#endif  // FIRSTGAME_SYSTEM_ASSET_H_
+#endif  // FIRSTGAMELINUX_ASSET_H_

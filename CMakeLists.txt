@@ -85,7 +85,7 @@ target_sources(FirstGame PRIVATE
     src/firstgame/firstgame.cpp
     src/firstgame/renderer/renderer.cpp
     src/firstgame/renderer/triangle_renderer.cpp
-    src/firstgame/system/asset.cpp
+    src/firstgame/system/asset_mgr.cpp
 )
 target_link_libraries(FirstGame PUBLIC
     Microsoft.GSL::GSL
