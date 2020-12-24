@@ -32,8 +32,8 @@ RendererImpl::RendererImpl()
     : shader_([] {
           using util::filesystem_literals::operator""_path;
           auto& asset_mgr = system::AssetManager::current();
-          auto vertex = asset_mgr.Open("shaders"_path / "main.vert"_path).Assert()->ReadToString();
-          auto fragment = asset_mgr.Open("shaders"_path / "main.frag"_path).Assert()->ReadToString();
+          auto vertex = asset_mgr.Open("shaders"_path / "main.vert").Assert()->ReadToString();
+          auto fragment = asset_mgr.Open("shaders"_path / "main.frag").Assert()->ReadToString();
           return opengl::Shader::Build(vertex.data(), fragment.data()).Assert();
       }())
 {
