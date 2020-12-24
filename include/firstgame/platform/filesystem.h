@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <filesystem>
 
 namespace firstgame::platform {
 
@@ -12,6 +13,7 @@ class File {
     // Interface
     virtual auto ReadToString() -> std::string = 0;
     virtual void Close() = 0;
+    virtual auto Path() -> std::filesystem::path = 0;
     // Destructor
     virtual ~File() = default;
 
@@ -24,7 +26,7 @@ class File {
 class FileSystem {
    public:
     // Interface
-    virtual auto Open(const char* filename, int mode) -> std::unique_ptr<File> = 0;
+    virtual auto Open(const char* filename) -> std::unique_ptr<File> = 0;
     // Destructor
     virtual ~FileSystem() = default;
 

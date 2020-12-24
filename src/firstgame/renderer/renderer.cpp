@@ -8,6 +8,7 @@
 #include "firstgame/system/log.h"
 #include "firstgame/system/asset.h"
 #include "firstgame/util/scoped.h"
+#include "firstgame/util/filesystem_literals.h"
 
 namespace firstgame::renderer {
 
@@ -29,9 +30,10 @@ class RendererImpl final {
 
 RendererImpl::RendererImpl()
     : shader_([] {
+          using util::filesystem_literals::operator""_path;
           auto& asset_mgr = system::AssetManager::current();
-          auto vertex_asset = asset_mgr.Open("shaders/main.vert", 0);
-          auto fragment_asset = asset_mgr.Open("shaders/main.frag", 0);
+          auto vertex_asset = asset_mgr.Open("shaders"_path / "main.vert"_path);
+          auto fragment_asset = asset_mgr.Open("shaders"_path / "main.frag"_path);
           ASSERT(vertex_asset);
           ASSERT(fragment_asset);
           std::string vertex_src = vertex_asset->ReadToString();

@@ -18,8 +18,8 @@ class Asset final {
     [[nodiscard]] auto ReadToString() -> std::string;
 
     // Con/Destructor
-    explicit Asset(std::unique_ptr<platform::File>&& file) : file_(std::move(file)) {}
-    ~Asset() = default;
+    explicit Asset(std::unique_ptr<platform::File>&& file, std::filesystem::path path);
+    ~Asset();
 
     // Copy/Move
     Asset(Asset&&) = default;
@@ -28,6 +28,7 @@ class Asset final {
     Asset& operator=(const Asset&) = delete;
 
    private:
+    std::filesystem::path path_;
     std::unique_ptr<platform::File> file_;
 };
 
@@ -35,7 +36,7 @@ class Asset final {
 class AssetManager final : public util::Currenton<AssetManager> {
    public:
     // Interface
-    [[nodiscard]] auto Open(const char* filename, int mode) -> std::optional<Asset>;
+    [[nodiscard]] auto Open(std::filesystem::path assetpath) -> std::optional<Asset>;
 
     // Con/Destructor
     explicit AssetManager(std::shared_ptr<platform::FileSystem> filesystem)
