@@ -33,16 +33,16 @@ auto Asset::ReadToString() -> std::string
 
 /**************************************************************************************************/
 
-auto AssetManager::Open(std::filesystem::path assetpath) -> std::optional<Asset>
+auto AssetManager::Open(std::filesystem::path assetpath) -> util::Scoped<Asset>
 {
     static std::filesystem::path basepath(FIRSTGAME_ASSETS_DIR_PATH);
     std::filesystem::path fullpath = basepath / assetpath;
     std::unique_ptr<platform::File> file = filesystem_->Open(fullpath.c_str());
     if (not file) {
         ERROR("Failed to open asset file (\"{}\")", assetpath.c_str());
-        return std::nullopt;
+        return {};
     }
-    return std::make_optional<Asset>(std::move(file), std::move(assetpath));
+    return util::make_scoped<Asset>(std::move(file), std::move(assetpath));
 }
 
 }  // namespace firstgame::system

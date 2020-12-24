@@ -45,6 +45,22 @@ class Scoped<T> final {
         }
     }
 
+    Scoped& Assert() &
+    {
+        if (not init) {
+            abort();
+        }
+        return *this;
+    }
+
+    Scoped&& Assert() &&
+    {
+        if (not init) {
+            abort();
+        }
+        return std::move(*this);
+    }
+
     Scoped(Scoped<T>&& other) noexcept : init(std::exchange(other.init, false))
     {
         if (init) {
@@ -133,6 +149,22 @@ class Scoped final {
             reinterpret_cast<T*>(object)->~T();
             init = false;
         }
+    }
+
+    Scoped& Assert() &
+    {
+        if (not init) {
+            abort();
+        }
+        return *this;
+    }
+
+    Scoped&& Assert() &&
+    {
+        if (not init) {
+            abort();
+        }
+        return std::move(*this);
     }
 
     template<typename F>

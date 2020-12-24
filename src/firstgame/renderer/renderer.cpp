@@ -32,15 +32,11 @@ RendererImpl::RendererImpl()
     : shader_([] {
           using util::filesystem_literals::operator""_path;
           auto& asset_mgr = system::AssetManager::current();
-          auto vertex_asset = asset_mgr.Open("shaders"_path / "main.vert"_path);
-          auto fragment_asset = asset_mgr.Open("shaders"_path / "main.frag"_path);
-          ASSERT(vertex_asset);
-          ASSERT(fragment_asset);
-          std::string vertex_src = vertex_asset->ReadToString();
-          std::string fragment_src = fragment_asset->ReadToString();
-          auto shader = opengl::Shader::Build(vertex_src.data(), fragment_src.data());
-          ASSERT(shader.exists());
-          return shader;
+          std::string vertex_src =
+              asset_mgr.Open("shaders"_path / "main.vert"_path).Assert()->ReadToString();
+          std::string fragment_src =
+              asset_mgr.Open("shaders"_path / "main.frag"_path).Assert()->ReadToString();
+          return opengl::Shader::Build(vertex_src.data(), fragment_src.data()).Assert();
       }())
 {
     TRACE("Created RendererImpl");

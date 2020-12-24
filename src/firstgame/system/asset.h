@@ -6,6 +6,7 @@
 #include <optional>
 
 #include "log.h"
+#include "firstgame/util/scoped.h"
 #include "firstgame/util/currenton.h"
 #include "firstgame/platform/filesystem.h"
 
@@ -36,7 +37,7 @@ class Asset final {
 class AssetManager final : public util::Currenton<AssetManager> {
    public:
     // Interface
-    [[nodiscard]] auto Open(std::filesystem::path assetpath) -> std::optional<Asset>;
+    [[nodiscard]] auto Open(std::filesystem::path assetpath) -> util::Scoped<Asset>;
 
     // Con/Destructor
     explicit AssetManager(std::shared_ptr<platform::FileSystem> filesystem)
