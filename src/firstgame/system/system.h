@@ -15,19 +15,24 @@ namespace firstgame::system {
 class System final : public util::Currenton<System> {
    public:
     // Interface
-    auto Logger() -> Logger& { return logger_; }
-    auto AssetManager() -> AssetManager& { return asset_mgr_; }
-    auto FileSystem() -> platform::FileSystem& { return *filesystem_; }
+    [[nodiscard]] auto Logger() -> Logger& { return logger_; }
+    [[nodiscard]] auto AssetManager() -> AssetManager& { return asset_mgr_; }
+    [[nodiscard]] auto FileSystem() -> platform::FileSystem& { return *filesystem_; }
 
     // Constructor
-    explicit System(std::shared_ptr<spdlog::logger> logger,
-                    std::shared_ptr<platform::FileSystem> filesystem)
+    System(std::shared_ptr<spdlog::logger> logger, std::shared_ptr<platform::FileSystem> filesystem)
         : logger_(std::move(logger)), asset_mgr_(filesystem), filesystem_(std::move(filesystem))
     {
         TRACE("Initialized System");
     }
     // Destructor
     ~System() override { TRACE("De-initialized System"); }
+
+    // Copy/Move
+    System(System&&) = delete;
+    System(const System&) = delete;
+    System& operator=(System&&) = delete;
+    System& operator=(const System&) = delete;
 
    private:
     system::Logger logger_;

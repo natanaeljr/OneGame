@@ -12,7 +12,15 @@ class Renderer final {
    public:
     Renderer();
     ~Renderer();
+
+    // Interface
     void Render();
+
+    // Copy/Move
+    Renderer(Renderer&&) = delete;
+    Renderer(const Renderer&) = delete;
+    Renderer& operator=(Renderer&&) = delete;
+    Renderer& operator=(const Renderer&) = delete;
 
    private:
     //! Implementation object buffer

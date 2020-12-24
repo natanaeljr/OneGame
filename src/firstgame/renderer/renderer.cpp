@@ -3,7 +3,7 @@
 #include <new>
 #include <string_view>
 #include "triangle_renderer.h"
-#include "firstgame/opengl/gl/gl.h"
+#include "firstgame/opengl/gl.h"
 #include "firstgame/opengl/shader.h"
 #include "firstgame/system/log.h"
 #include "firstgame/system/asset.h"
