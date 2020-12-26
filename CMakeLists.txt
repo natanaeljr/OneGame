@@ -70,6 +70,8 @@ find_package(glm 0.9.9.9 EXACT REQUIRED)
 find_package(stb 0.8.1 EXACT REQUIRED COMPONENTS stb_image)
 # Assimp for 3D model loading
 find_package(assimp 5.0.0 EXACT REQUIRED)
+# EnTT for Entity Component System library
+find_package(EnTT 3.5.2 EXACT REQUIRED)
 
 # IrrXML for Assimp dependency
 find_library(IrrXML_LIBRARY NAMES IrrXML IrrXMLd)
@@ -96,6 +98,7 @@ target_link_libraries(FirstGame PUBLIC
     assimp::assimp
     ${IrrXML_LIBRARY}
     ${Zlib_LIBRARY}
+    EnTT::EnTT
     $<$<BOOL:${FIRSTGAME_OPENGL_GLAD}>:glad::glad>
     $<$<BOOL:${FIRSTGAME_OPENGL_GLBINDING3}>:glbinding::glbinding>
     $<$<BOOL:${FIRSTGAME_OPENGL_GLBINDING3}>:glbinding::glbinding-aux>
