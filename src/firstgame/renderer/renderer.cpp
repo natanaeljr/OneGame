@@ -2,13 +2,16 @@
 
 #include <new>
 #include <string_view>
-#include "triangle_renderer.h"
+#include <entt/entity/registry.hpp>
+
 #include "firstgame/opengl/gl.h"
 #include "firstgame/opengl/shader.h"
 #include "firstgame/system/log.h"
 #include "firstgame/system/asset_mgr.h"
 #include "firstgame/util/scoped.h"
 #include "firstgame/util/filesystem_literals.h"
+
+#include "component.h"
 
 namespace firstgame::renderer {
 
@@ -19,11 +22,10 @@ class RendererImpl final {
    public:
     RendererImpl();
     ~RendererImpl();
-    void Render();
+    void Render(const entt::registry& registry);
 
    private:
     util::Scoped<opengl::Shader> shader_;
-    TriangleRenderer triangle_;
 };
 
 /**************************************************************************************************/
@@ -49,11 +51,15 @@ RendererImpl::~RendererImpl()
 
 /**************************************************************************************************/
 
-void RendererImpl::Render()
+void RendererImpl::Render(const entt::registry& registry)
 {
     glUseProgram(shader_->program);
 
-    triangle_.Render();
+    auto view = registry.view<const RenderComponent>();
+    view.each([](const RenderComponent& render) {
+        glBindVertexArray(render.vao);
+        glDrawElements(GL_TRIANGLES, render.elements, GL_UNSIGNED_SHORT, nullptr);
+    });
 
     glUseProgram(0);
 }
@@ -76,9 +82,9 @@ Renderer::~Renderer()
     reinterpret_cast<RendererImpl*>(impl_)->~RendererImpl();
 }
 
-void Renderer::Render()
+void Renderer::Render(const entt::registry& registry)
 {
-    reinterpret_cast<RendererImpl*>(impl_)->Render();
+    reinterpret_cast<RendererImpl*>(impl_)->Render(registry);
 }
 
 }  // namespace firstgame::renderer

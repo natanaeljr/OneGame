@@ -82,11 +82,12 @@ find_library(Zlib_LIBRARY NAMES zlibstatic zlibstaticd)
 # Project
 #########################################################################################
 # Main target binary
-add_library(FirstGame STATIC)
+add_library(FirstGame STATIC src/firstgame/renderer/helper.h)
 target_sources(FirstGame PRIVATE
     src/firstgame/firstgame.cpp
     src/firstgame/renderer/renderer.cpp
-    src/firstgame/renderer/triangle_renderer.cpp
+    src/firstgame/renderer/component.cpp
+    src/firstgame/renderer/helper.cpp
     src/firstgame/system/asset_mgr.cpp
 )
 target_link_libraries(FirstGame PUBLIC

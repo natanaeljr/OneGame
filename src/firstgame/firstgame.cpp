@@ -4,17 +4,22 @@
 
 #include "firstgame/firstgame.h"
 
+#include <entt/entity/handle.hpp>
+#include <entt/entity/registry.hpp>
+
 #include "firstgame/event.h"
 #include "firstgame/system/log.h"
 #include "firstgame/system/system.h"
+#include "firstgame/renderer/helper.h"
 #include "firstgame/renderer/renderer.h"
+#include "firstgame/renderer/component.h"
 
 namespace firstgame {
 
 /**************************************************************************************************/
 
 //! Class that implements the FirstGame interface
-class FirstGameImpl : public FirstGame {
+class FirstGameImpl final : public FirstGame {
    public:
     explicit FirstGameImpl(std::shared_ptr<spdlog::logger> logger,
                            std::shared_ptr<platform::FileSystem> filesystem);
@@ -26,6 +31,7 @@ class FirstGameImpl : public FirstGame {
    private:
     system::System system_;
     renderer::Renderer renderer_;
+    entt::registry registry_;
 };
 
 /**************************************************************************************************/
@@ -35,13 +41,16 @@ FirstGameImpl::FirstGameImpl(std::shared_ptr<spdlog::logger> logger,
     : system_(std::move(logger), std::move(filesystem))
 {
     TRACE("Created FirstGameImpl");
+
+    entt::handle quad{ registry_, registry_.create() };
+    quad.emplace<renderer::RenderComponent>(renderer::GenerateQuad());
 }
 
 /**************************************************************************************************/
 
 void FirstGameImpl::Update(unsigned int timestep)
 {
-    renderer_.Render();
+    renderer_.Render(registry_);
 }
 
 /**************************************************************************************************/

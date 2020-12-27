@@ -5,6 +5,8 @@
 #ifndef FIRSTGAME_RENDERER_RENDERER_H_
 #define FIRSTGAME_RENDERER_RENDERER_H_
 
+#include <entt/entity/fwd.hpp>
+
 namespace firstgame::renderer {
 
 //! Renderer Interface
@@ -14,7 +16,7 @@ class Renderer final {
     ~Renderer();
 
     // Interface
-    void Render();
+    void Render(const entt::registry& registry);
 
     // Copy/Move
     Renderer(Renderer&&) = delete;
@@ -24,7 +26,7 @@ class Renderer final {
 
    private:
     //! Implementation object buffer
-    alignas(4) unsigned char impl_[16]{};
+    alignas(4) unsigned char impl_[8]{};
 };
 
 }  // namespace firstgame::renderer
