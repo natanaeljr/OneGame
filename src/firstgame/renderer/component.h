@@ -1,28 +1,28 @@
 #ifndef FIRSTGAME_RENDERER_COMPONENT_H_
 #define FIRSTGAME_RENDERER_COMPONENT_H_
 
+#include <tuple>
 #include <utility>
-#include "firstgame/opengl/gl/types.h"
 
 namespace firstgame::renderer {
 
 /// Render Component contains GPU-uploaded data, ready to be rendered.
 struct RenderComponent final {
-    GLuint vao{};
-    GLuint vbo{};
-    GLuint ebo{};
-    unsigned short elements{};
+    unsigned int vao{};
+    unsigned int vbo{};
+    unsigned int ebo{};
+    unsigned short elements{};  ///< number of indices
 
-    /// Generate the buffer objects on GPU
+    /// Create and generate the buffer objects on GPU
     explicit RenderComponent(unsigned short elements);
 
     /// Create from existing objects
-    RenderComponent(GLuint vao, GLuint vbo, GLuint ebo, unsigned short count)
-        : vao(vao), vbo(vbo), ebo(ebo), elements(count)
+    RenderComponent(unsigned int vao, unsigned int vbo, unsigned int ebo, unsigned short elements)
+        : vao(vao), vbo(vbo), ebo(ebo), elements(elements)
     {
     }
 
-    /// Delete buffer objects if valid
+    /// Delete buffer objects if non-zero
     ~RenderComponent();
 
     /// For creating a null RenderComponent

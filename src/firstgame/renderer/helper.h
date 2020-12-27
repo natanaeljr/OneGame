@@ -3,14 +3,13 @@
 
 #include <gsl/span>
 #include "component.h"
-#include "firstgame/opengl/gl/types.h"
 
 namespace firstgame::renderer {
 
 RenderComponent GenerateQuad();
 
-RenderComponent GenerateRenderComponent(gsl::span<const GLfloat> vertices,
-                                        gsl::span<const GLushort> indices);
+RenderComponent GenerateRenderComponent(gsl::span<const float> vertices,
+                                        gsl::span<const unsigned short> indices);
 
 }  // namespace firstgame::renderer
 
