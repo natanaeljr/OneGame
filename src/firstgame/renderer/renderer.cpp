@@ -63,7 +63,7 @@ void RendererImpl::Render(const entt::registry& registry)
     glUseProgram(shader_->program);
 
     auto view = registry.view<const TransformComponent, const RenderComponent>();
-    view.each([this](const TransformComponent& transform, const RenderComponent& render) {
+    view.each([this](const auto& transform, const auto& render) {
         auto modelview = glm::mat4(1.0f);
         modelview = glm::translate(modelview, transform.position);
         modelview = glm::scale(modelview, transform.scale);
@@ -71,8 +71,6 @@ void RendererImpl::Render(const entt::registry& registry)
         glBindVertexArray(render.vao);
         glDrawElements(GL_TRIANGLES, render.elements, GL_UNSIGNED_SHORT, nullptr);
     });
-
-    glUseProgram(0);
 }
 
 /**************************************************************************************************/

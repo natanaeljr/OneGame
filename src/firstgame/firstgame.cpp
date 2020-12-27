@@ -6,6 +6,7 @@
 
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
+#include <imgui/imgui.h>
 
 #include "firstgame/event.h"
 #include "firstgame/system/log.h"
@@ -66,7 +67,10 @@ void FirstGameImpl::Update(unsigned int timestep)
 
 void FirstGameImpl::OnImGuiRender()
 {
-    // ImGui::ShowDemoWindow();
+    ImGui::Begin("Stats");
+    ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
+                ImGui::GetIO().Framerate);
+    ImGui::End();
 }
 
 /**************************************************************************************************/
