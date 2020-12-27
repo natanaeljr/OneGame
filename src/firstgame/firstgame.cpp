@@ -13,6 +13,7 @@
 #include "firstgame/renderer/helper.h"
 #include "firstgame/renderer/renderer.h"
 #include "firstgame/renderer/component.h"
+#include "firstgame/renderer/transform.h"
 
 namespace firstgame {
 
@@ -42,8 +43,16 @@ FirstGameImpl::FirstGameImpl(std::shared_ptr<spdlog::logger> logger,
 {
     TRACE("Created FirstGameImpl");
 
-    entt::handle quad{ registry_, registry_.create() };
-    quad.emplace<renderer::RenderComponent>(renderer::GenerateQuad());
+    // Generate Quads
+    for (float i : { 1.f, 2.f, 3.f, 4.f, 5.f }) {
+        float x = ((2.0f / 5) * i) - 1.0f - (2.0f / 5 / 2);
+        entt::handle quad{ registry_, registry_.create() };
+        quad.emplace<renderer::RenderComponent>(renderer::GenerateQuad());
+        quad.emplace<renderer::TransformComponent>(renderer::TransformComponent{
+            .position = glm::vec3(x, 0.0f, 0.0f),
+            .scale = glm::vec3(0.12f),
+        });
+    }
 }
 
 /**************************************************************************************************/
