@@ -17,6 +17,10 @@
 #include "component.h"
 #include "transform.h"
 
+// TODO: temporary
+#include "shader_variable.h"
+#include "shader.h"
+
 namespace firstgame::renderer {
 
 /**************************************************************************************************/
