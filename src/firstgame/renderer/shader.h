@@ -13,7 +13,7 @@ class Shader {
    public:
     opengl::Shader* operator->() { return &shader_; }
     const opengl::Shader* operator->() const { return &shader_; }
-    
+
     // TODO: Maybe do a ShaderLayout for locations?
 
     [[nodiscard]] bool HasLocation(ShaderVariable variable) const

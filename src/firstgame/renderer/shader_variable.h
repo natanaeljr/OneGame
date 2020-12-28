@@ -1,15 +1,15 @@
-#ifndef FIRSTGAME_SHADER_MODEL_H_
-#define FIRSTGAME_SHADER_MODEL_H_
+#ifndef FIRSTGAME_RENDERER_SHADER_VARIABLE_H_
+#define FIRSTGAME_RENDERER_SHADER_VARIABLE_H_
 
 #include "firstgame/system/log.h"
 
 namespace firstgame::renderer {
 
 /// ShaderVariable is meant to provide a way to generalize the shaders inputs, so that the code can
-/// perform the same tasks on multiple shaders that follow this shader variable patters.
-
-/// List of all supported variables for using in Shaders
+/// perform the same tasks on any shader that follows this shader variable patters, discarding the
+/// need for hard-coded Shader information for each shader program written.
 struct ShaderVariable final {
+    /// List of all supported variables for using in Shaders
     enum class Enum : unsigned char {
         InPosition = 0,
         InTexCoord,
@@ -24,8 +24,10 @@ struct ShaderVariable final {
         UniformTexture1,
         UniformTexture2,
     };
+    /// Total number of Variables
     static constexpr size_t Count = (static_cast<size_t>(Enum::UniformTexture2) + 1u);
 
+    /// Convenience declarations in object form for easy use
     static const ShaderVariable InPosition;
     static const ShaderVariable InTexCoord;
     static const ShaderVariable InColor;
@@ -39,6 +41,7 @@ struct ShaderVariable final {
     static const ShaderVariable UniformTexture1;
     static const ShaderVariable UniformTexture2;
 
+    /// Get the standardized variable name
     [[nodiscard]] inline constexpr const char* string() const
     {
         switch (enum_) {
@@ -71,15 +74,20 @@ struct ShaderVariable final {
         return nullptr;
     }
 
+    /// Implicit construct from the enum form
     constexpr ShaderVariable(Enum e) noexcept : enum_(e) {}
+    /// Implicit cast to the enum form
     constexpr operator Enum() const noexcept { return enum_; }
+    /// Get the underlying enumerator
     [[nodiscard]] constexpr Enum enumerator() const { return enum_; }
+    /// Get the index number of the enumerator
     [[nodiscard]] constexpr auto index() const
     {
         return static_cast<std::underlying_type_t<Enum>>(enum_);
     }
+    /// Logical operators, for more, use the Enum type
     constexpr bool operator==(ShaderVariable other) const { return this->enum_ == other.enum_; }
-    constexpr bool operator!=(ShaderVariable other) const { return this->enum_ == other.enum_; }
+    constexpr bool operator!=(ShaderVariable other) const { return this->enum_ != other.enum_; }
 
    private:
     Enum enum_;
