@@ -45,30 +45,18 @@ struct ShaderVariable final {
     [[nodiscard]] inline constexpr const char* string() const
     {
         switch (enum_) {
-            case Enum::InPosition:
-                return "inPosition";
-            case Enum::InTexCoord:
-                return "inTexCoord";
-            case Enum::InColor:
-                return "inColor";
-            case Enum::UniformColor:
-                return "uColor";
-            case Enum::UniformModel:
-                return "uModel";
-            case Enum::UniformView:
-                return "uView";
-            case Enum::UniformProjection:
-                return "uProjection";
-            case Enum::UniformModelView:
-                return "uModelView";
-            case Enum::UniformViewProjection:
-                return "uViewProjection";
-            case Enum::UniformModelViewProjection:
-                return "uModelViewProjection";
-            case Enum::UniformTexture1:
-                return "uTexture1";
-            case Enum::UniformTexture2:
-                return "uTexture2";
+            case Enum::InPosition: return "inPosition";
+            case Enum::InTexCoord: return "inTexCoord";
+            case Enum::InColor: return "inColor";
+            case Enum::UniformColor: return "uColor";
+            case Enum::UniformModel: return "uModel";
+            case Enum::UniformView: return "uView";
+            case Enum::UniformProjection: return "uProjection";
+            case Enum::UniformModelView: return "uModelView";
+            case Enum::UniformViewProjection: return "uViewProjection";
+            case Enum::UniformModelViewProjection: return "uModelViewProjection";
+            case Enum::UniformTexture1: return "uTexture1";
+            case Enum::UniformTexture2: return "uTexture2";
         }
         ASSERT_MSG(0, "Invalid shader variable {}", enum_);
         return nullptr;
