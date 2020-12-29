@@ -4,7 +4,7 @@
 #include "firstgame/system/log.h"
 
 // TODO: temporary
-#include "shader_attrib.h"
+#include "shader_variables.h"
 
 namespace firstgame::renderer {
 
@@ -36,9 +36,9 @@ RenderComponent GenerateRenderComponent(gsl::span<const float> vertices,
     glBindVertexArray(render.vao);
     glBindBuffer(GL_ARRAY_BUFFER, render.vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size_bytes(), vertices.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(ShaderAttrib::Position.location(), 3, GL_FLOAT, GL_FALSE,
+    glVertexAttribPointer(ShaderVertexAttrib::Position.location(), 3, GL_FLOAT, GL_FALSE,
                           3 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(ShaderAttrib::Position.location());
+    glEnableVertexAttribArray(ShaderVertexAttrib::Position.location());
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, render.ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size_bytes(), indices.data(), GL_STATIC_DRAW);
     return render;

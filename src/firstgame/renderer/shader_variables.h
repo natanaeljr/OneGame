@@ -1,9 +1,56 @@
-#ifndef FIRSTGAME_RENDERER_SHADER_UNIFORM_H_
-#define FIRSTGAME_RENDERER_SHADER_UNIFORM_H_
+#ifndef FIRSTGAME_RENDERER_SHADER_VARIABLES_H_
+#define FIRSTGAME_RENDERER_SHADER_VARIABLES_H_
 
 #include "firstgame/system/log.h"
 
 namespace firstgame::renderer {
+
+/// ShaderVertexAttrib is meant to provide a way to generalize the shaders inputs, so that the code
+/// can perform the same tasks on any shader that follows this shader variable patters, discarding
+/// the need for hard-coded Shader information for each shader program written.
+struct ShaderVertexAttrib {
+    /// List of all supported vertex attributes for using in Shaders
+    enum class Enum {
+        Position = 0,
+        TexCoord = 1,
+        Color = 2,
+    };
+
+    /// Declarations in object form for convenience
+    static const ShaderVertexAttrib Position;
+    static const ShaderVertexAttrib TexCoord;
+    static const ShaderVertexAttrib Color;
+
+    /// Get the standardized variable name
+    [[nodiscard]] inline constexpr const char* string() const
+    {
+        switch (enum_) {
+            case Enum::Position: return "inPosition";
+            case Enum::TexCoord: return "inTexCoord";
+            case Enum::Color: return "inColor";
+        }
+        ASSERT_MSG(0, "Invalid shader vertex attribute {}", enum_);
+        return nullptr;
+    }
+
+    /// Implicit construct from the enum form
+    constexpr ShaderVertexAttrib(Enum e) noexcept : enum_(e) {}
+    /// Implicit cast to the enum form
+    constexpr operator Enum() const noexcept { return enum_; }
+    /// Get the underlying enumerator
+    [[nodiscard]] constexpr Enum enumerator() const { return enum_; }
+    /// Get the location/index of the attribute
+    [[nodiscard]] constexpr auto location() const
+    {
+        return static_cast<std::underlying_type_t<Enum>>(enum_);
+    }
+    /// Logical operators, for more, use the Enum type
+    constexpr bool operator==(ShaderVertexAttrib other) const { return this->enum_ == other.enum_; }
+    constexpr bool operator!=(ShaderVertexAttrib other) const { return this->enum_ != other.enum_; }
+
+   private:
+    Enum enum_;
+};
 
 /// ShaderUniform is meant to provide a way to generalize the shaders inputs, so that the code can
 /// perform the same tasks on any shader that follows this shader variable patters, discarding the
@@ -74,6 +121,13 @@ struct ShaderUniform {
 };
 
 // clang-format off
+
+/// Shader Vertex Attribute Objects
+constexpr ShaderVertexAttrib ShaderVertexAttrib::Position{ ShaderVertexAttrib::Enum::Position };
+constexpr ShaderVertexAttrib ShaderVertexAttrib::TexCoord{ ShaderVertexAttrib::Enum::TexCoord };
+constexpr ShaderVertexAttrib ShaderVertexAttrib::Color{ ShaderVertexAttrib::Enum::Color };
+
+/// Shader Uniform Objects
 constexpr ShaderUniform ShaderUniform::Color{ ShaderUniform::Enum::Color };
 constexpr ShaderUniform ShaderUniform::Model{ ShaderUniform::Enum::Model };
 constexpr ShaderUniform ShaderUniform::View{ ShaderUniform::Enum::View };
@@ -84,8 +138,9 @@ constexpr ShaderUniform ShaderUniform::ModelViewProjection{ ShaderUniform::Enum:
 constexpr ShaderUniform ShaderUniform::Texture0{ ShaderUniform::Enum::Texture0 };
 constexpr ShaderUniform ShaderUniform::Texture1{ ShaderUniform::Enum::Texture1 };
 constexpr ShaderUniform ShaderUniform::Texture2{ ShaderUniform::Enum::Texture2 };
+
 // clang-format on
 
 }  // namespace firstgame::renderer
 
-#endif  // FIRSTGAME_RENDERER_SHADER_UNIFORM_H_
+#endif  // FIRSTGAME_RENDERER_SHADER_VARIABLES_H_

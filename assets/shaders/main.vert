@@ -1,10 +1,12 @@
 #version 330 core
+#extension GL_ARB_explicit_attrib_location : require
+#extension GL_ARB_explicit_uniform_location : require
 
 layout(location = 0) in vec3 position;
 
 out vec4 color;
 
-uniform mat4 modelview;
+layout(location = 4) uniform mat4 modelview;
 
 void main()
 {
