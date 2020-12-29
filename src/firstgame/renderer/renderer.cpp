@@ -18,8 +18,8 @@
 #include "transform.h"
 
 // TODO: temporary
-#include "shader_variable.h"
-#include "shader.h"
+#include "shader_attrib.h"
+#include "shader_uniform.h"
 
 namespace firstgame::renderer {
 
@@ -51,6 +51,8 @@ RendererImpl::RendererImpl()
 {
     ASSERT(uniform_modelview_ != -1);
     TRACE("Created RendererImpl");
+    DEBUG("position: {}", glGetAttribLocation(shader_->program, "position"));
+    DEBUG("uniform_modelview_: {}", uniform_modelview_);
 }
 
 /**************************************************************************************************/
