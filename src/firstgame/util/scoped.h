@@ -167,16 +167,14 @@ class Scoped final {
         return std::move(*this);
     }
 
-    template<typename F>
-    explicit Scoped(Scoped<T, F>&& other) noexcept
-        : init(std::exchange(other.init, false)), final_(other.final_)
+    Scoped(Scoped&& other) noexcept
+        : init(std::exchange(other.init, false)), final_(std::move(other.final_))
     {
         if (init) {
             std::memcpy(this->object, other.object, sizeof(T));
         }
     }
-    template<typename F>
-    Scoped& operator=(Scoped<T, F>&& other) & noexcept
+    Scoped& operator=(Scoped&& other) noexcept
     {
         if (init) {
             final_(this->operator*());
@@ -184,17 +182,15 @@ class Scoped final {
         }
         this->init = other.init;
         if (other.init) {
-            this->final_ = other.final_;
+            this->final_ = std::move(other.final_);
             std::memcpy(this->object, other.object, sizeof(T));
             other.init = false;
         }
         return *this;
     }
 
-    template<typename F>
-    Scoped(const Scoped<T, F>&) = delete;
-    template<typename F>
-    Scoped& operator=(const Scoped<T, F>&) = delete;
+    Scoped(const Scoped&) = delete;
+    Scoped& operator=(const Scoped&) = delete;
 
     ~Scoped()
     {
