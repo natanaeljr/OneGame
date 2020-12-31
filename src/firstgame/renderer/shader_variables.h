@@ -62,9 +62,6 @@ struct ShaderUniform {
         Model = 1,
         View = 2,
         Projection = 3,
-        ModelView = 4,
-        ViewProjection = 5,
-        ModelViewProjection = 6,
         Texture0 = 10,
         Texture1 = 11,
         Texture2 = 12,
@@ -75,9 +72,6 @@ struct ShaderUniform {
     static const ShaderUniform Model;
     static const ShaderUniform View;
     static const ShaderUniform Projection;
-    static const ShaderUniform ModelView;
-    static const ShaderUniform ViewProjection;
-    static const ShaderUniform ModelViewProjection;
     static const ShaderUniform Texture0;
     static const ShaderUniform Texture1;
     static const ShaderUniform Texture2;
@@ -90,9 +84,6 @@ struct ShaderUniform {
             case Enum::Model: return "uModel";
             case Enum::View: return "uView";
             case Enum::Projection: return "uProjection";
-            case Enum::ModelView: return "uModelView";
-            case Enum::ViewProjection: return "uViewProjection";
-            case Enum::ModelViewProjection: return "uModelViewProjection";
             case Enum::Texture0: return "uTexture0";
             case Enum::Texture1: return "uTexture1";
             case Enum::Texture2: return "uTexture2";
@@ -132,9 +123,6 @@ constexpr ShaderUniform ShaderUniform::Color{ ShaderUniform::Enum::Color };
 constexpr ShaderUniform ShaderUniform::Model{ ShaderUniform::Enum::Model };
 constexpr ShaderUniform ShaderUniform::View{ ShaderUniform::Enum::View };
 constexpr ShaderUniform ShaderUniform::Projection{ ShaderUniform::Enum::Projection };
-constexpr ShaderUniform ShaderUniform::ModelView{ ShaderUniform::Enum::ModelView };
-constexpr ShaderUniform ShaderUniform::ViewProjection{ ShaderUniform::Enum::ViewProjection };
-constexpr ShaderUniform ShaderUniform::ModelViewProjection{ ShaderUniform::Enum::ModelViewProjection };
 constexpr ShaderUniform ShaderUniform::Texture0{ ShaderUniform::Enum::Texture0 };
 constexpr ShaderUniform ShaderUniform::Texture1{ ShaderUniform::Enum::Texture1 };
 constexpr ShaderUniform ShaderUniform::Texture2{ ShaderUniform::Enum::Texture2 };

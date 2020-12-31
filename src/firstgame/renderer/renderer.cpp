@@ -16,6 +16,7 @@
 
 #include "component.h"
 #include "transform.h"
+#include "shader_variables.h"
 
 namespace firstgame::renderer {
 
@@ -30,7 +31,6 @@ class RendererImpl final {
 
    private:
     util::Scoped<opengl::Shader> shader_;
-    GLint uniform_modelview_;
 };
 
 /**************************************************************************************************/
@@ -42,10 +42,8 @@ RendererImpl::RendererImpl()
           auto vertex = asset_mgr.Open("shaders"_path / "main.vert").Assert()->ReadToString();
           auto fragment = asset_mgr.Open("shaders"_path / "main.frag").Assert()->ReadToString();
           return opengl::Shader::Build(vertex.data(), fragment.data()).Assert();
-      }()),
-      uniform_modelview_(glGetUniformLocation(shader_->program, "modelview"))
+      }())
 {
-    ASSERT(uniform_modelview_ != -1);
     TRACE("Created RendererImpl");
 }
 
@@ -64,10 +62,12 @@ void RendererImpl::Render(const entt::registry& registry)
 
     auto view = registry.view<const TransformComponent, const RenderComponent>();
     view.each([this](const auto& transform, const auto& render) {
-        auto modelview = glm::mat4(1.0f);
-        modelview = glm::translate(modelview, transform.position);
-        modelview = glm::scale(modelview, transform.scale);
-        glUniformMatrix4fv(uniform_modelview_, 1, GL_FALSE, glm::value_ptr(modelview));
+        auto model = glm::mat4(1.0f);
+        model = glm::translate(model, transform.position);
+        model = glm::scale(model, transform.scale);
+        auto view = glm::mat4(1.0f);
+        glUniformMatrix4fv(ShaderUniform::Model.location(), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(ShaderUniform::View.location(), 1, GL_FALSE, glm::value_ptr(view));
         glBindVertexArray(render.vao);
         glDrawElements(GL_TRIANGLES, render.elements, GL_UNSIGNED_SHORT, nullptr);
     });
