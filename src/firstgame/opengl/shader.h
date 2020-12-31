@@ -59,23 +59,23 @@ auto Shader::Build(const char* vertex_src, const char* fragment_src) -> util::Sc
 auto Shader::Compile(GLenum shader_type, const char* shader_src)
     -> util::Scoped<GLuint, std::decay_t<decltype(glDeleteShader)>>
 {
-    GLuint shader = glCreateShader(shader_type);
-    glShaderSource(shader, 1, &shader_src, nullptr);
-    glCompileShader(shader);
+    auto shader = util::make_scoped_final<GLuint>(&glDeleteShader, glCreateShader(shader_type));
+    glShaderSource(*shader, 1, &shader_src, nullptr);
+    glCompileShader(*shader);
+    GLint info_len = 0;
+    glGetShaderiv(*shader, GL_INFO_LOG_LENGTH, &info_len);
+    if (info_len) {
+        auto info = std::make_unique<char[]>(info_len);
+        glGetShaderInfoLog(*shader, info_len, nullptr, info.get());
+        DEBUG("{} Compilation Output:\n{}", Shader::Str(shader_type), info.get());
+    }
     GLint compiled = 0;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+    glGetShaderiv(*shader, GL_COMPILE_STATUS, &compiled);
     if (!compiled) {
-        GLint info_len = 0;
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &info_len);
-        if (info_len) {
-            auto info = std::unique_ptr<char[]>(new char[info_len]);
-            glGetShaderInfoLog(shader, info_len, nullptr, info.get());
-            ERROR("Failed to Compile Shader [{}]:\n{}", Shader::Str(shader_type), info.get());
-        }
-        glDeleteShader(shader);
+        ERROR("Failed to Compile {}", Shader::Str(shader_type));
         return {};
     }
-    return util::make_scoped_final<GLuint>(glDeleteShader, shader);
+    return shader;
 }
 
 /**************************************************************************************************/
@@ -85,16 +85,17 @@ bool Shader::Link(GLuint vertex_shader, GLuint fragment_shader) const
     glAttachShader(program, vertex_shader);
     glAttachShader(program, fragment_shader);
     glLinkProgram(program);
+    GLint info_len = 0;
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &info_len);
+    if (info_len) {
+        auto info = std::make_unique<char[]>(info_len);
+        glGetProgramInfoLog(program, info_len, nullptr, info.get());
+        DEBUG("Shader Program Link Output:\n{}", info.get());
+    }
     GLint link_status = 0;
     glGetProgramiv(program, GL_LINK_STATUS, &link_status);
     if (!link_status) {
-        GLint info_len = 0;
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &info_len);
-        if (info_len) {
-            auto info = std::unique_ptr<char[]>(new char[info_len]);
-            glGetProgramInfoLog(program, info_len, nullptr, info.get());
-            ERROR("Failed to Link Program: {}", info.get());
-        }
+        ERROR("Failed to Link Shader Program");
     }
     glDetachShader(program, fragment_shader);
     glDetachShader(program, vertex_shader);
@@ -106,15 +107,10 @@ bool Shader::Link(GLuint vertex_shader, GLuint fragment_shader) const
 const char* Shader::Str(GLenum shader_type)
 {
     switch (shader_type) {
-        case GL_VERTEX_SHADER:
-            return "GL_VERTEX_SHADER";
-        case GL_FRAGMENT_SHADER:
-            return "GL_FRAGMENT_SHADER";
-        case GL_GEOMETRY_SHADER:
-            return "GL_GEOMETRY_SHADER";
-        default:
-            ASSERT_MSG(0, "Invalid shader type {}", shader_type);
-            return "<invalid>";
+        case GL_VERTEX_SHADER: return "GL_VERTEX_SHADER";
+        case GL_FRAGMENT_SHADER: return "GL_FRAGMENT_SHADER";
+        case GL_GEOMETRY_SHADER: return "GL_GEOMETRY_SHADER";
+        default: ASSERT_MSG(0, "Invalid shader type {}", shader_type); return "<invalid>";
     }
 }
 
