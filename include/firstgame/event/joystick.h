@@ -3,10 +3,10 @@
 
 namespace firstgame::event {
 
-struct JoystickEvent {
+struct JoystickEvent final {
     // TODO
 };
 
-}  // namespace firstgame::event
+}  // namespace firstgame::variant
 
 #endif  // FIRSTGAME_EVENT_JOYSTICK_H_

@@ -5,11 +5,11 @@
 
 namespace firstgame::event {
 
-struct KeyEvent {
+struct KeyEvent final {
     input::Key key;
     input::KeyAction action;
 };
 
-}  // namespace firstgame::event
+}  // namespace firstgame::variant
 
 #endif  // FIRSTGAME_EVENT_KEY_H_

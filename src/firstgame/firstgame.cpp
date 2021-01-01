@@ -15,6 +15,7 @@
 #include "firstgame/renderer/renderer.h"
 #include "firstgame/renderer/component.h"
 #include "firstgame/renderer/transform.h"
+#include "firstgame/util/overloaded.h"
 
 namespace firstgame {
 
@@ -23,7 +24,7 @@ namespace firstgame {
 //! Class that implements the FirstGame interface
 class FirstGameImpl final : public FirstGame {
    public:
-    explicit FirstGameImpl(std::shared_ptr<spdlog::logger> logger,
+    explicit FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logger> logger,
                            std::shared_ptr<platform::FileSystem> filesystem);
     void Update(unsigned int timestep) override;
     void OnImGuiRender() override;
@@ -38,9 +39,9 @@ class FirstGameImpl final : public FirstGame {
 
 /**************************************************************************************************/
 
-FirstGameImpl::FirstGameImpl(std::shared_ptr<spdlog::logger> logger,
+FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logger> logger,
                              std::shared_ptr<platform::FileSystem> filesystem)
-    : system_(std::move(logger), std::move(filesystem))
+    : system_(std::move(logger), std::move(filesystem)), renderer_(width, height)
 {
     TRACE("Created FirstGameImpl");
 
@@ -77,7 +78,29 @@ void FirstGameImpl::OnImGuiRender()
 
 void FirstGameImpl::OnEvent(const event::Event& event)
 {
-    TRACE("Event Received! Index: {}", event.event.index());
+    std::visit(
+        util::Overloaded{
+            [](const event::KeyEvent& key_event) { TRACE("Event Received: Key"); },
+            [](const event::CursorEvent& cursor_event) { TRACE("Event Received: Cursor"); },
+            [](const event::MouseEvent& mouse_event) { TRACE("Event Received: Mouse"); },
+            [](const event::JoystickEvent& joystick_event) { TRACE("Event Received: Joystick"); },
+            [this](const event::WindowEvent& window_event) {
+                std::visit(util::Overloaded{
+                               [](const event::WindowEvent::Focus& focus) {
+                                   TRACE("Event Received: Window::Focus");
+                               },
+                               [](const event::WindowEvent::Imize& imize) {
+                                   TRACE("Event Received: Window::Imize");
+                               },
+                               [this](const event::WindowEvent::Resize& resize) {
+                                   TRACE("Event Received: Window::Resize");
+                                   renderer_.ResizeCanvas(resize.width, resize.height);
+                               },
+                           },
+                           window_event.variant);
+            },
+        },
+        event);
 }
 
 /**************************************************************************************************/
@@ -89,10 +112,10 @@ FirstGameImpl::~FirstGameImpl()
 
 /**************************************************************************************************/
 
-auto FirstGame::New(std::shared_ptr<spdlog::logger> logger,
+auto FirstGame::New(int width, int height, std::shared_ptr<spdlog::logger> logger,
                     std::shared_ptr<platform::FileSystem> filesystem) -> std::unique_ptr<FirstGame>
 {
-    return std::make_unique<FirstGameImpl>(std::move(logger), std::move(filesystem));
+    return std::make_unique<FirstGameImpl>(width, height, std::move(logger), std::move(filesystem));
 }
 
 }  // namespace firstgame

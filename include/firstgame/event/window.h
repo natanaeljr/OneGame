@@ -5,7 +5,7 @@
 
 namespace firstgame::event {
 
-struct WindowEvent {
+struct WindowEvent final {
     struct Resize {
         int width;
         int height;
@@ -19,7 +19,7 @@ struct WindowEvent {
         Min,
     };
 
-    std::variant<Resize, Focus, Imize> window_event;
+    std::variant<Resize, Focus, Imize> variant;
 };
 
 }  // namespace firstgame::event

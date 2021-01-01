@@ -26,9 +26,10 @@ namespace firstgame::renderer {
 //! Renderer Implementation
 class RendererImpl final {
    public:
-    RendererImpl();
+    RendererImpl(int width, int height);
     ~RendererImpl();
     void Render(const entt::registry& registry);
+    void ResizeCanvas(int width, int height);
 
    private:
     util::Scoped<opengl::Shader> shader_;
@@ -36,7 +37,7 @@ class RendererImpl final {
 
 /**************************************************************************************************/
 
-RendererImpl::RendererImpl()
+RendererImpl::RendererImpl(int width, int height)
     : shader_([] {
           using util::filesystem_literals::operator""_path;
           auto& asset_mgr = system::AssetManager::current();
@@ -45,6 +46,7 @@ RendererImpl::RendererImpl()
           return opengl::Shader::Build(vertex.data(), fragment.data()).Assert();
       }())
 {
+    ResizeCanvas(width, height);
     TRACE("Created RendererImpl");
 }
 
@@ -75,16 +77,23 @@ void RendererImpl::Render(const entt::registry& registry)
 }
 
 /**************************************************************************************************/
+
+void RendererImpl::ResizeCanvas(int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
+/**************************************************************************************************/
 /**************************************************************************************************/
 
-Renderer::Renderer()
+Renderer::Renderer(int width, int height)
 {
     // guarantee same memory alignment of the interface and implementation
     static_assert(alignof(Renderer) == alignof(RendererImpl));
     // guarantee enough space in the implementation object buffer
     static_assert(sizeof(impl_) == sizeof(RendererImpl));
     // placement new
-    new (impl_) RendererImpl();
+    new (impl_) RendererImpl(width, height);
 }
 
 Renderer::~Renderer()
@@ -95,6 +104,11 @@ Renderer::~Renderer()
 void Renderer::Render(const entt::registry& registry)
 {
     reinterpret_cast<RendererImpl*>(impl_)->Render(registry);
+}
+
+void Renderer::ResizeCanvas(int width, int height)
+{
+    reinterpret_cast<RendererImpl*>(impl_)->ResizeCanvas(width, height);
 }
 
 }  // namespace firstgame::renderer

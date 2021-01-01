@@ -12,11 +12,12 @@ namespace firstgame::renderer {
 //! Renderer Interface
 class Renderer final {
    public:
-    Renderer();
+    Renderer(int width, int height);
     ~Renderer();
 
     // Interface
     void Render(const entt::registry& registry);
+    void ResizeCanvas(int width, int height);
 
     // Copy/Move
     Renderer(Renderer&&) = delete;
