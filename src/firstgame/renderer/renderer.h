@@ -18,6 +18,7 @@ class Renderer final {
     // Interface
     void Render(const entt::registry& registry);
     void ResizeCanvas(int width, int height);
+    void HandleScrollEvent(double yoffset);
 
     // Copy/Move
     Renderer(Renderer&&) = delete;
@@ -27,7 +28,7 @@ class Renderer final {
 
    private:
     //! Implementation object buffer
-    alignas(4) unsigned char impl_[8]{};
+    alignas(4) unsigned char impl_[84]{};
 };
 
 }  // namespace firstgame::renderer
