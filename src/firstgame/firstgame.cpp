@@ -83,6 +83,7 @@ void FirstGameImpl::OnEvent(const event::Event& event)
             [](const event::KeyEvent& key_event) { TRACE("Event Received: Key"); },
             [](const event::CursorEvent& cursor_event) { TRACE("Event Received: Cursor"); },
             [](const event::MouseEvent& mouse_event) { TRACE("Event Received: Mouse"); },
+            [](const event::ScrollEvent& scroll_event) { TRACE("Event Received: Scroll"); },
             [](const event::JoystickEvent& joystick_event) { TRACE("Event Received: Joystick"); },
             [this](const event::WindowEvent& window_event) {
                 std::visit(util::Overloaded{
