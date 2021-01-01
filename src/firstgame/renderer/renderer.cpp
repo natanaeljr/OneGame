@@ -14,6 +14,7 @@
 #include "firstgame/util/scoped.h"
 #include "firstgame/util/filesystem_literals.h"
 
+#include "camera.h"
 #include "component.h"
 #include "transform.h"
 #include "shader_variables.h"

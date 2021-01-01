@@ -8,7 +8,7 @@
 #include <entt/entity/registry.hpp>
 #include <imgui/imgui.h>
 
-#include "firstgame/event.h"
+#include "firstgame/event/event.h"
 #include "firstgame/system/log.h"
 #include "firstgame/system/system.h"
 #include "firstgame/renderer/helper.h"
@@ -27,7 +27,7 @@ class FirstGameImpl final : public FirstGame {
                            std::shared_ptr<platform::FileSystem> filesystem);
     void Update(unsigned int timestep) override;
     void OnImGuiRender() override;
-    void OnEvent(const Event& event) override;
+    void OnEvent(const event::Event& event) override;
     ~FirstGameImpl() override;
 
    private:
@@ -75,10 +75,9 @@ void FirstGameImpl::OnImGuiRender()
 
 /**************************************************************************************************/
 
-void FirstGameImpl::OnEvent(const Event& event)
+void FirstGameImpl::OnEvent(const event::Event& event)
 {
-    TRACE("Event Received!");
-    // TODO: Handle mouse/keyboard/touch and window events
+    TRACE("Event Received! Index: {}", event.event.index());
 }
 
 /**************************************************************************************************/

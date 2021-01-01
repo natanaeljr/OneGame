@@ -7,6 +7,11 @@
 
 namespace firstgame {
 
+/// Forward-declarations
+namespace event {
+struct Event;
+}
+
 /// Game Interface
 class FirstGame {
    public:
@@ -15,7 +20,7 @@ class FirstGame {
     // Interface
     virtual void Update(unsigned int timestep) = 0;
     virtual void OnImGuiRender() = 0;
-    virtual void OnEvent(const class Event& event) = 0;
+    virtual void OnEvent(const event::Event& event) = 0;
     // Destructor
     virtual ~FirstGame() = default;
 
