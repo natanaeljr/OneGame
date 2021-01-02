@@ -24,48 +24,35 @@
 
 namespace firstgame::render {
 
-template<typename Camera>
-struct CameraMatrix {
-    Camera camera;
-    ViewProjection matrix;
-};
-
 /**************************************************************************************************/
 
 //! Renderer Implementation
 class RendererImpl final {
    public:
-    RendererImpl(int width, int height);
+    explicit RendererImpl(util::Size size);
     ~RendererImpl();
     void Render(const entt::registry& registry);
-    void ResizeCanvas(int width, int height);
-    void HandleScrollEvent(double yoffset);
+    void OnResize(util::Size size);
+    void OnZoom(float offset);
 
    private:
-    CameraMatrix<CameraPerspective> camera_;
     util::Scoped<opengl::Shader> shader_;
+    CameraSystem camera_;
 };
 
 /**************************************************************************************************/
 
-RendererImpl::RendererImpl(int width, int height)
-    : camera_([=] {
-          CameraPerspective camera = {
-              .aspect_ratio = (float) width / (float) height,
-              .fovy_degrees = 45.0f,
-          };
-          ViewProjection matrix = camera.ToViewProjection();
-          return CameraMatrix<CameraPerspective>{ .camera = camera, .matrix = matrix };
-      }()),
-      shader_([] {
+RendererImpl::RendererImpl(util::Size size)
+    : shader_([] {
           using util::filesystem_literals::operator""_path;
           auto& asset_mgr = system::AssetManager::current();
           auto vertex = asset_mgr.Open("shaders"_path / "main.vert").Assert()->ReadToString();
           auto fragment = asset_mgr.Open("shaders"_path / "main.frag").Assert()->ReadToString();
           return opengl::Shader::Build(vertex.data(), fragment.data()).Assert();
-      }())
+      }()),
+      camera_(size)
 {
-    ResizeCanvas(width, height);
+    OnResize(size);
     TRACE("Created RendererImpl");
 }
 
@@ -82,10 +69,7 @@ void RendererImpl::Render(const entt::registry& registry)
 {
     glUseProgram(shader_->program);
 
-    glUniformMatrix4fv(ShaderUniform::View.location(), 1, GL_FALSE,
-                       glm::value_ptr(camera_.matrix.view));
-    glUniformMatrix4fv(ShaderUniform::Projection.location(), 1, GL_FALSE,
-                       glm::value_ptr(camera_.matrix.projection));
+    camera_.Render(RenderPass::_3D);
 
     auto view = registry.view<const Transform, const Renderable>();
     view.each([this](const auto& transform, const auto& renderable) {
@@ -100,33 +84,31 @@ void RendererImpl::Render(const entt::registry& registry)
 
 /**************************************************************************************************/
 
-void RendererImpl::ResizeCanvas(int width, int height)
+void RendererImpl::OnResize(util::Size size)
+
 {
-    glViewport(0, 0, width, height);
-    camera_.camera.Resize(width, height);
-    camera_.matrix = camera_.camera.ToViewProjection();
+    glViewport(0, 0, size.width, size.height);
+    camera_.OnResize(size);
 }
 
 /**************************************************************************************************/
 
-void RendererImpl::HandleScrollEvent(double yoffset)
+void RendererImpl::OnZoom(float offset)
 {
-    camera_.camera.Zoom(static_cast<float>(yoffset));
-    camera_.matrix = camera_.camera.ToViewProjection();
-    TRACE("Updated fovy_degrees_: {}", camera_.camera.fovy_degrees);
+    camera_.OnZoom(offset);
 }
 
 /**************************************************************************************************/
 /**************************************************************************************************/
 
-Renderer::Renderer(int width, int height)
+Renderer::Renderer(util::Size size)
 {
     // guarantee same memory alignment of the interface and implementation
     static_assert(alignof(Renderer) == alignof(RendererImpl));
     // guarantee enough space in the implementation object buffer
-    static_assert(sizeof(impl_) == sizeof(RendererImpl));
+    static_assert(sizeof(impl_) >= sizeof(RendererImpl));
     // placement new
-    new (impl_) RendererImpl(width, height);
+    new (impl_) RendererImpl(size);
 }
 
 Renderer::~Renderer()
@@ -139,14 +121,14 @@ void Renderer::Render(const entt::registry& registry)
     reinterpret_cast<RendererImpl*>(impl_)->Render(registry);
 }
 
-void Renderer::ResizeCanvas(int width, int height)
+void Renderer::OnResize(util::Size size)
 {
-    reinterpret_cast<RendererImpl*>(impl_)->ResizeCanvas(width, height);
+    reinterpret_cast<RendererImpl*>(impl_)->OnResize(size);
 }
 
-void Renderer::HandleScrollEvent(double yoffset)
+void Renderer::OnZoom(float offset)
 {
-    reinterpret_cast<RendererImpl*>(impl_)->HandleScrollEvent(yoffset);
+    reinterpret_cast<RendererImpl*>(impl_)->OnZoom(offset);
 }
 
 }  // namespace firstgame::render

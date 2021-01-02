@@ -88,6 +88,7 @@ target_sources(FirstGame PRIVATE
     src/firstgame/render/renderer.cpp
     src/firstgame/render/renderable.cpp
     src/firstgame/render/helper.cpp
+    src/firstgame/render/camera_system.cpp
     src/firstgame/system/asset_mgr.cpp
 )
 target_link_libraries(FirstGame PUBLIC

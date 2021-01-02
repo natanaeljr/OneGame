@@ -41,7 +41,7 @@ class FirstGameImpl final : public FirstGame {
 
 FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logger> logger,
                              std::shared_ptr<platform::FileSystem> filesystem)
-    : system_(std::move(logger), std::move(filesystem)), renderer_(width, height)
+    : system_(std::move(logger), std::move(filesystem)), renderer_({ width, height })
 {
     TRACE("Created FirstGameImpl");
 
@@ -86,7 +86,7 @@ void FirstGameImpl::OnEvent(const event::Event& event)
             [this](const event::ScrollEvent& scroll) {
                 TRACE("Event Received: Scroll {{xoffset: {}, yoffset: {}}}", scroll.xoffset,
                       scroll.yoffset);
-                renderer_.HandleScrollEvent(scroll.yoffset);
+                renderer_.OnZoom(scroll.yoffset);
             },
             [](const event::JoystickEvent& joystick_event) { TRACE("Event Received: Joystick"); },
             [this](const event::WindowEvent& window_event) {
@@ -99,7 +99,7 @@ void FirstGameImpl::OnEvent(const event::Event& event)
                                },
                                [this](const event::WindowEvent::Resize& resize) {
                                    TRACE("Event Received: Window::Resize");
-                                   renderer_.ResizeCanvas(resize.width, resize.height);
+                                   renderer_.OnResize({ resize.width, resize.height });
                                },
                            },
                            window_event.variant);
