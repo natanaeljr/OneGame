@@ -7,7 +7,8 @@
 
 namespace firstgame::render {
 
-struct CameraOrthographic final {
+class CameraOrthographic final {
+   public:
     explicit CameraOrthographic(util::SizeT<float> size)
     {
         Resize(size);
@@ -16,30 +17,30 @@ struct CameraOrthographic final {
 
     void Resize(util::SizeT<float> size)
     {
-        aspect_ratio = size.width / size.height;
-        matrix.projection = glm::ortho(-aspect_ratio * zoom_level, +aspect_ratio * zoom_level,
-                                       -zoom_level, +zoom_level, -1.0f, +1.0f);
+        aspect_ratio_ = size.width / size.height;
+        matrix_.projection = glm::ortho(-aspect_ratio_ * zoom_level_, +aspect_ratio_ * zoom_level_,
+                                        -zoom_level_, +zoom_level_, -1.0f, +1.0f);
     }
 
     void Zoom(float offset)
     {
         static constexpr float kZoomSpeed = 0.25f;
-        zoom_level = offset * kZoomSpeed;
-        zoom_level = std::max(zoom_level, 0.25f);
+        zoom_level_ = offset * kZoomSpeed;
+        zoom_level_ = std::max(zoom_level_, 0.25f);
         glm::mat4 transform =
-            glm::translate(glm::mat4(1.0f), position) *
-            glm::rotate(glm::mat4(1.0f), glm::radians(rotation), glm::vec3(0, 0, 1));
-        matrix.view = glm::inverse(transform);
+            glm::translate(glm::mat4(1.0f), position_) *
+            glm::rotate(glm::mat4(1.0f), glm::radians(rotation_), glm::vec3(0, 0, 1));
+        matrix_.view = glm::inverse(transform);
     }
 
-    [[nodiscard]] const ViewProjection& Matrix() const { return matrix; }
+    [[nodiscard]] const ViewProjection& Matrix() const { return matrix_; }
 
    private:
-    glm::vec3 position{ 0.0f };
-    float rotation{ 0.0f };
-    float aspect_ratio{ 1.0f };
-    float zoom_level{ 0.0f };
-    ViewProjection matrix{};
+    glm::vec3 position_{ 0.0f };
+    float rotation_{ 0.0f };
+    float aspect_ratio_{ 1.0f };
+    float zoom_level_{ 0.0f };
+    ViewProjection matrix_{};
 };
 
 }  // namespace firstgame::render

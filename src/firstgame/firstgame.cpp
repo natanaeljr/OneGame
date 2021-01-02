@@ -45,16 +45,24 @@ FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logg
 {
     TRACE("Created FirstGameImpl");
 
-    // Generate Quads
-    for (float i : { 1.f, 2.f, 3.f, 4.f, 5.f }) {
-        float x = ((2.0f / 5) * i) - 1.0f - (2.0f / 5 / 2);
-        entt::handle quad{ registry_, registry_.create() };
-        quad.emplace<render::Renderable>(render::GenerateQuad());
-        quad.emplace<render::Transform>(render::Transform{
-            .position = glm::vec3(x, 0.0f, 0.0f),
-            .scale = glm::vec3(0.12f),
-        });
-    }
+    // Generate Multiple Quads
+    // for (float i : { 1.f, 2.f, 3.f, 4.f, 5.f }) {
+    //     float x = ((2.0f / 5) * i) - 1.0f - (2.0f / 5 / 2);
+    //     entt::handle quad{ registry_, registry_.create() };
+    //     quad.emplace<render::Renderable>(render::GenerateQuad());
+    //     quad.emplace<render::Transform>(render::Transform{
+    //         .position = glm::vec3(x, 0.0f, 0.0f),
+    //         .scale = glm::vec3(0.12f),
+    //     });
+    // }
+
+    // Generate Single Quad
+    entt::handle quad{ registry_, registry_.create() };
+    quad.emplace<render::Renderable>(render::GenerateQuad());
+    quad.emplace<render::Transform>(render::Transform{
+        .position = glm::vec3(0.0f),
+        .scale = glm::vec3(1.0f),
+    });
 }
 
 /**************************************************************************************************/
@@ -80,13 +88,22 @@ void FirstGameImpl::OnEvent(const event::Event& event)
 {
     std::visit(
         util::Overloaded{
-            [](const event::KeyEvent& key_event) { TRACE("Event Received: Key"); },
-            [](const event::CursorEvent& cursor_event) { TRACE("Event Received: Cursor"); },
-            [](const event::MouseEvent& mouse_event) { TRACE("Event Received: Mouse"); },
+            [this](const event::KeyEvent& key) {
+                TRACE("Event Received: Key {{key: {}, action: {}}}", key.key, key.action);
+                renderer_.OnKeystroke(key, 0.016f);
+            },
+            [this](const event::CursorEvent& cursor) {
+                TRACE("Event Received: Cursor {{xpos: {}, ypos: {}}}", cursor.xpos, cursor.ypos);
+                renderer_.OnCursorMove(cursor.xpos, cursor.ypos);
+            },
+            [](const event::MouseEvent& mouse) {
+                TRACE("Event Received: Mouse {{button: {}, action: {}}}", mouse.button,
+                      mouse.action);
+            },
             [this](const event::ScrollEvent& scroll) {
                 TRACE("Event Received: Scroll {{xoffset: {}, yoffset: {}}}", scroll.xoffset,
                       scroll.yoffset);
-                renderer_.OnZoom(scroll.yoffset);
+                renderer_.OnScroll(scroll.yoffset);
             },
             [](const event::JoystickEvent& joystick_event) { TRACE("Event Received: Joystick"); },
             [this](const event::WindowEvent& window_event) {

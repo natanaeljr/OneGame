@@ -2,20 +2,23 @@
 #define FIRSTGAME_RENDER_RENDERER_H_
 
 #include <entt/entity/fwd.hpp>
-#include "../util/size.h"
+#include "firstgame/util/size.h"
+#include "firstgame/event/key.h"
 
 namespace firstgame::render {
 
 //! Renderer Interface
 class Renderer final {
    public:
-    Renderer(util::Size size);
+    explicit Renderer(util::Size size);
     ~Renderer();
 
     // Interface
     void Render(const entt::registry& registry);
     void OnResize(util::Size size);
-    void OnZoom(float offset);
+    void OnScroll(float offset);
+    void OnCursorMove(float xpos, float ypos);
+    void OnKeystroke(event::KeyEvent key_event, float deltatime);
 
     // Copy/Move
     Renderer(Renderer&&) = delete;

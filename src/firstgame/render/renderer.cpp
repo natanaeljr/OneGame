@@ -34,23 +34,24 @@ class RendererImpl final {
     void Render(const entt::registry& registry);
     void OnResize(util::Size size);
     void OnZoom(float offset);
+    void OnCursorMove(float xpos, float ypos);
+    void OnKeystroke(event::KeyEvent key_event, float deltatime);
 
    private:
-    util::Scoped<opengl::Shader> shader_;
     CameraSystem camera_;
+    util::Scoped<opengl::Shader> shader_;
 };
 
 /**************************************************************************************************/
 
 RendererImpl::RendererImpl(util::Size size)
-    : shader_([] {
+    : camera_(size), shader_([] {
           using util::filesystem_literals::operator""_path;
           auto& asset_mgr = system::AssetManager::current();
           auto vertex = asset_mgr.Open("shaders"_path / "main.vert").Assert()->ReadToString();
           auto fragment = asset_mgr.Open("shaders"_path / "main.frag").Assert()->ReadToString();
           return opengl::Shader::Build(vertex.data(), fragment.data()).Assert();
-      }()),
-      camera_(size)
+      }())
 {
     OnResize(size);
     TRACE("Created RendererImpl");
@@ -99,6 +100,36 @@ void RendererImpl::OnZoom(float offset)
 }
 
 /**************************************************************************************************/
+
+void RendererImpl::OnCursorMove(float xpos, float ypos)
+{
+    camera_.OnPoint(xpos, ypos);
+}
+
+/**************************************************************************************************/
+
+void RendererImpl::OnKeystroke(event::KeyEvent key_event, float deltatime)
+{
+    const auto move_direction = [&]() -> std::optional<util::MoveDirection> {
+        if (key_event.action == input::KeyAction::Release) {
+            return std::nullopt;
+        }
+        switch (key_event.key) {
+            case input::Key::W: return util::MoveDirection::Forward;
+            case input::Key::S: return util::MoveDirection::Backward;
+            case input::Key::A: return util::MoveDirection::Left;
+            case input::Key::D: return util::MoveDirection::Right;
+            case input::Key::SPACE: return util::MoveDirection::Up;
+            case input::Key::TAB: return util::MoveDirection::Down;
+            default: return std::nullopt;
+        }
+    }();
+    if (move_direction) {
+        camera_.OnMove(*move_direction, deltatime);
+    }
+}
+
+/**************************************************************************************************/
 /**************************************************************************************************/
 
 Renderer::Renderer(util::Size size)
@@ -126,9 +157,19 @@ void Renderer::OnResize(util::Size size)
     reinterpret_cast<RendererImpl*>(impl_)->OnResize(size);
 }
 
-void Renderer::OnZoom(float offset)
+void Renderer::OnScroll(float offset)
 {
     reinterpret_cast<RendererImpl*>(impl_)->OnZoom(offset);
+}
+
+void Renderer::OnCursorMove(float xpos, float ypos)
+{
+    reinterpret_cast<RendererImpl*>(impl_)->OnCursorMove(xpos, ypos);
+}
+
+void Renderer::OnKeystroke(event::KeyEvent key_event, float deltatime)
+{
+    reinterpret_cast<RendererImpl*>(impl_)->OnKeystroke(key_event, deltatime);
 }
 
 }  // namespace firstgame::render

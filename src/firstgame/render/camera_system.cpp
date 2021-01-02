@@ -17,6 +17,7 @@ void CameraSystem::Render(RenderPass pass) const
         }
         abort();
     }();
+
     glUniformMatrix4fv(ShaderUniform::View.location(), 1, GL_FALSE, glm::value_ptr(matrix.view));
     glUniformMatrix4fv(ShaderUniform::Projection.location(), 1, GL_FALSE,
                        glm::value_ptr(matrix.projection));
