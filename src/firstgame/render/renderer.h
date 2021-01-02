@@ -1,13 +1,9 @@
-/**
- * Render Interface of FirstGame.
- */
-
-#ifndef FIRSTGAME_RENDERER_RENDERER_H_
-#define FIRSTGAME_RENDERER_RENDERER_H_
+#ifndef FIRSTGAME_RENDER_RENDERER_H_
+#define FIRSTGAME_RENDER_RENDERER_H_
 
 #include <entt/entity/fwd.hpp>
 
-namespace firstgame::renderer {
+namespace firstgame::render {
 
 //! Renderer Interface
 class Renderer final {
@@ -31,6 +27,6 @@ class Renderer final {
     alignas(4) unsigned char impl_[144]{};
 };
 
-}  // namespace firstgame::renderer
+}  // namespace firstgame::render
 
-#endif  // FIRSTGAME_RENDERER_RENDERER_H_
+#endif  // FIRSTGAME_RENDER_RENDERER_H_

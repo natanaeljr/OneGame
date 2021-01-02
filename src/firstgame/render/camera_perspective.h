@@ -1,12 +1,12 @@
-#ifndef FIRSTGAME_RENDERER_CAMERA_PERSPECTIVE_H_
-#define FIRSTGAME_RENDERER_CAMERA_PERSPECTIVE_H_
+#ifndef FIRSTGAME_RENDER_CAMERA_PERSPECTIVE_H_
+#define FIRSTGAME_RENDER_CAMERA_PERSPECTIVE_H_
 
 #include <glm/ext/vector_float3.hpp>
 #include <glm/ext/matrix_float4x4.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include "view_projection.h"
 
-namespace firstgame::renderer {
+namespace firstgame::render {
 
 struct CameraPerspective final {
     float aspect_ratio;
@@ -34,6 +34,6 @@ struct CameraPerspective final {
     }
 };
 
-}  // namespace firstgame::renderer
+}  // namespace firstgame::render
 
-#endif  // FIRSTGAME_RENDERER_CAMERA_PERSPECTIVE_H_
+#endif  // FIRSTGAME_RENDER_CAMERA_PERSPECTIVE_H_

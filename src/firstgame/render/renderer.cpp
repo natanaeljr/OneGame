@@ -17,11 +17,12 @@
 #include "camera_orthographic.h"
 #include "camera_perspective.h"
 #include "view_projection.h"
-#include "component.h"
+#include "renderable.h"
 #include "transform.h"
 #include "shader_variables.h"
+#include "camera_system.h"
 
-namespace firstgame::renderer {
+namespace firstgame::render {
 
 template<typename Camera>
 struct CameraMatrix {
@@ -86,14 +87,14 @@ void RendererImpl::Render(const entt::registry& registry)
     glUniformMatrix4fv(ShaderUniform::Projection.location(), 1, GL_FALSE,
                        glm::value_ptr(camera_.matrix.projection));
 
-    auto view = registry.view<const TransformComponent, const RenderComponent>();
-    view.each([this](const auto& transform, const auto& render) {
+    auto view = registry.view<const Transform, const Renderable>();
+    view.each([this](const auto& transform, const auto& renderable) {
         auto model = glm::mat4(1.0f);
         model = glm::translate(model, transform.position);
         model = glm::scale(model, transform.scale);
         glUniformMatrix4fv(ShaderUniform::Model.location(), 1, GL_FALSE, glm::value_ptr(model));
-        glBindVertexArray(render.vao);
-        glDrawElements(GL_TRIANGLES, render.num_vertices, GL_UNSIGNED_SHORT, nullptr);
+        glBindVertexArray(renderable.vao);
+        glDrawElements(GL_TRIANGLES, renderable.num_vertices, GL_UNSIGNED_SHORT, nullptr);
     });
 }
 
@@ -110,7 +111,7 @@ void RendererImpl::ResizeCanvas(int width, int height)
 
 void RendererImpl::HandleScrollEvent(double yoffset)
 {
-    camera_.camera.Zoom(yoffset);
+    camera_.camera.Zoom(static_cast<float>(yoffset));
     camera_.matrix = camera_.camera.ToViewProjection();
     TRACE("Updated fovy_degrees_: {}", camera_.camera.fovy_degrees);
 }
@@ -148,4 +149,4 @@ void Renderer::HandleScrollEvent(double yoffset)
     reinterpret_cast<RendererImpl*>(impl_)->HandleScrollEvent(yoffset);
 }
 
-}  // namespace firstgame::renderer
+}  // namespace firstgame::render

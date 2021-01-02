@@ -1,17 +1,17 @@
-#include "component.h"
+#include "renderable.h"
 
 #include "firstgame/opengl/gl/functions.h"
 
-namespace firstgame::renderer {
+namespace firstgame::render {
 
-RenderComponent::RenderComponent(unsigned short elements) : num_vertices(elements)
+Renderable::Renderable(unsigned short elements) : num_vertices(elements)
 {
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ebo);
 }
 
-RenderComponent::~RenderComponent()
+Renderable::~Renderable()
 {
     if (vao)
         glDeleteVertexArrays(1, &vao);
@@ -21,4 +21,4 @@ RenderComponent::~RenderComponent()
         glDeleteBuffers(1, &ebo);
 }
 
-}  // namespace firstgame::renderer
+}  // namespace firstgame::render

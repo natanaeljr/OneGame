@@ -1,9 +1,7 @@
-#ifndef FIRSTGAME_RENDERER_SHADER_VARIABLES_H_
-#define FIRSTGAME_RENDERER_SHADER_VARIABLES_H_
+#ifndef FIRSTGAME_RENDER_SHADER_VARIABLES_H_
+#define FIRSTGAME_RENDER_SHADER_VARIABLES_H_
 
-#include "firstgame/system/log.h"
-
-namespace firstgame::renderer {
+namespace firstgame::render {
 
 /// ShaderVertexAttrib is meant to provide a way to generalize the shaders inputs, so that the code
 /// can perform the same tasks on any shader that follows this shader variable patters, discarding
@@ -29,7 +27,6 @@ struct ShaderVertexAttrib {
             case Enum::TexCoord: return "inTexCoord";
             case Enum::Color: return "inColor";
         }
-        ASSERT_MSG(0, "Invalid shader vertex attribute {}", enum_);
         return nullptr;
     }
 
@@ -88,7 +85,6 @@ struct ShaderUniform {
             case Enum::Texture1: return "uTexture1";
             case Enum::Texture2: return "uTexture2";
         }
-        ASSERT_MSG(0, "Invalid shader uniform {}", enum_);
         return nullptr;
     }
 
@@ -129,6 +125,6 @@ constexpr ShaderUniform ShaderUniform::Texture2{ ShaderUniform::Enum::Texture2 }
 
 // clang-format on
 
-}  // namespace firstgame::renderer
+}  // namespace firstgame::render
 
-#endif  // FIRSTGAME_RENDERER_SHADER_VARIABLES_H_
+#endif  // FIRSTGAME_RENDER_SHADER_VARIABLES_H_
