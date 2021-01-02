@@ -11,14 +11,15 @@ struct RenderComponent final {
     unsigned int vao{};
     unsigned int vbo{};
     unsigned int ebo{};
-    unsigned short elements{};  ///< number of indices
+    unsigned short num_vertices{};
 
     /// Create and generate the buffer objects on GPU
     explicit RenderComponent(unsigned short elements);
 
     /// Create from existing objects
-    RenderComponent(unsigned int vao, unsigned int vbo, unsigned int ebo, unsigned short elements)
-        : vao(vao), vbo(vbo), ebo(ebo), elements(elements)
+    RenderComponent(unsigned int vao, unsigned int vbo, unsigned int ebo,
+                    unsigned short num_vertices)
+        : vao(vao), vbo(vbo), ebo(ebo), num_vertices(num_vertices)
     {
     }
 
@@ -37,7 +38,7 @@ struct RenderComponent final {
         : vao(std::exchange(other.vao, 0)),
           vbo(std::exchange(other.vbo, 0)),
           ebo(std::exchange(other.ebo, 0)),
-          elements(std::exchange(other.elements, 0))
+          num_vertices(std::exchange(other.num_vertices, 0))
     {
     }
 
@@ -47,7 +48,7 @@ struct RenderComponent final {
         vao = std::exchange(other.vao, 0);
         vbo = std::exchange(other.vbo, 0);
         ebo = std::exchange(other.ebo, 0);
-        elements = std::exchange(other.elements, 0);
+        num_vertices = std::exchange(other.num_vertices, 0);
         return *this;
     }
 
@@ -56,7 +57,7 @@ struct RenderComponent final {
     RenderComponent& operator=(const RenderComponent&) = delete;
 
     /// Transform to std::tie
-    [[nodiscard]] inline auto tie() const { return std::tie(vao, vbo, ebo, elements); }
+    [[nodiscard]] inline auto tie() const { return std::tie(vao, vbo, ebo, num_vertices); }
 
     /// Equality operator
     bool operator==(const RenderComponent& other) const { return this->tie() == other.tie(); }

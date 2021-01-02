@@ -4,7 +4,7 @@
 
 namespace firstgame::renderer {
 
-RenderComponent::RenderComponent(unsigned short elements) : elements(elements)
+RenderComponent::RenderComponent(unsigned short elements) : num_vertices(elements)
 {
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);

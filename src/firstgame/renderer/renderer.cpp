@@ -14,12 +14,20 @@
 #include "firstgame/util/scoped.h"
 #include "firstgame/util/filesystem_literals.h"
 
-#include "camera.h"
+#include "camera_orthographic.h"
+#include "camera_perspective.h"
+#include "view_projection.h"
 #include "component.h"
 #include "transform.h"
 #include "shader_variables.h"
 
 namespace firstgame::renderer {
+
+template<typename Camera>
+struct CameraMatrix {
+    Camera camera;
+    ViewProjection matrix;
+};
 
 /**************************************************************************************************/
 
@@ -33,21 +41,20 @@ class RendererImpl final {
     void HandleScrollEvent(double yoffset);
 
    private:
-    int width_, height_;
-    float fovy_degrees_;
-    glm::mat4 projection_;
+    CameraMatrix<CameraPerspective> camera_;
     util::Scoped<opengl::Shader> shader_;
 };
 
 /**************************************************************************************************/
 
 RendererImpl::RendererImpl(int width, int height)
-    : width_(width),
-      height_(height),
-      fovy_degrees_(45.0f),
-      projection_([=] {
-          float aspect_ratio = (float) width_ / (float) height_;
-          return glm::perspective(glm::radians(fovy_degrees_), aspect_ratio, +1.0f, -1.0f);
+    : camera_([=] {
+          CameraPerspective camera = {
+              .aspect_ratio = (float) width / (float) height,
+              .fovy_degrees = 45.0f,
+          };
+          ViewProjection matrix = camera_perspective_view_projection(camera);
+          return CameraMatrix<CameraPerspective>{ .camera = camera, .matrix = matrix };
       }()),
       shader_([] {
           using util::filesystem_literals::operator""_path;
@@ -74,13 +81,10 @@ void RendererImpl::Render(const entt::registry& registry)
 {
     glUseProgram(shader_->program);
 
-    {
-        auto view = glm::mat4(1.0f);
-        view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-        glUniformMatrix4fv(ShaderUniform::View.location(), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(ShaderUniform::Projection.location(), 1, GL_FALSE,
-                           glm::value_ptr(projection_));
-    }
+    glUniformMatrix4fv(ShaderUniform::View.location(), 1, GL_FALSE,
+                       glm::value_ptr(camera_.matrix.view));
+    glUniformMatrix4fv(ShaderUniform::Projection.location(), 1, GL_FALSE,
+                       glm::value_ptr(camera_.matrix.projection));
 
     auto view = registry.view<const TransformComponent, const RenderComponent>();
     view.each([this](const auto& transform, const auto& render) {
@@ -89,7 +93,7 @@ void RendererImpl::Render(const entt::registry& registry)
         model = glm::scale(model, transform.scale);
         glUniformMatrix4fv(ShaderUniform::Model.location(), 1, GL_FALSE, glm::value_ptr(model));
         glBindVertexArray(render.vao);
-        glDrawElements(GL_TRIANGLES, render.elements, GL_UNSIGNED_SHORT, nullptr);
+        glDrawElements(GL_TRIANGLES, render.num_vertices, GL_UNSIGNED_SHORT, nullptr);
     });
 }
 
@@ -97,27 +101,18 @@ void RendererImpl::Render(const entt::registry& registry)
 
 void RendererImpl::ResizeCanvas(int width, int height)
 {
-    this->width_ = width;
-    this->height_ = height;
-    float aspect_ratio = (float) width_ / (float) height_;
-    projection_ = glm::perspective(glm::radians(45.0f), aspect_ratio, +1.0f, -1.0f);
     glViewport(0, 0, width, height);
+    camera_perspective_system_on_resize_canvas(width, height, camera_.camera);
+    camera_.matrix = camera_perspective_view_projection(camera_.camera);
 }
 
 /**************************************************************************************************/
 
 void RendererImpl::HandleScrollEvent(double yoffset)
 {
-    fovy_degrees_ -= (float) yoffset * 2.0f;
-    if (fovy_degrees_ < 1.0f)
-        fovy_degrees_ = 1.0f;
-    if (fovy_degrees_ > 45.0f)
-        fovy_degrees_ = 45.0f;
-
-    float aspect_ratio = (float) width_ / (float) height_;
-    projection_ = glm::perspective(glm::radians(fovy_degrees_), aspect_ratio, +1.0f, -1.0f);
-
-    TRACE("Updated fovy_degrees_: {}", fovy_degrees_);
+    camera_perspective_system_on_zoom((float) yoffset, camera_.camera);
+    camera_.matrix = camera_perspective_view_projection(camera_.camera);
+    TRACE("Updated fovy_degrees_: {}", camera_.camera.fovy_degrees);
 }
 
 /**************************************************************************************************/

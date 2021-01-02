@@ -28,7 +28,7 @@ class Renderer final {
 
    private:
     //! Implementation object buffer
-    alignas(4) unsigned char impl_[84]{};
+    alignas(4) unsigned char impl_[144]{};
 };
 
 }  // namespace firstgame::renderer
