@@ -53,7 +53,7 @@ RendererImpl::RendererImpl(int width, int height)
               .aspect_ratio = (float) width / (float) height,
               .fovy_degrees = 45.0f,
           };
-          ViewProjection matrix = camera_perspective_view_projection(camera);
+          ViewProjection matrix = camera.ToViewProjection();
           return CameraMatrix<CameraPerspective>{ .camera = camera, .matrix = matrix };
       }()),
       shader_([] {
@@ -102,16 +102,16 @@ void RendererImpl::Render(const entt::registry& registry)
 void RendererImpl::ResizeCanvas(int width, int height)
 {
     glViewport(0, 0, width, height);
-    camera_perspective_system_on_resize_canvas(width, height, camera_.camera);
-    camera_.matrix = camera_perspective_view_projection(camera_.camera);
+    camera_.camera.Resize(width, height);
+    camera_.matrix = camera_.camera.ToViewProjection();
 }
 
 /**************************************************************************************************/
 
 void RendererImpl::HandleScrollEvent(double yoffset)
 {
-    camera_perspective_system_on_zoom((float) yoffset, camera_.camera);
-    camera_.matrix = camera_perspective_view_projection(camera_.camera);
+    camera_.camera.Zoom(yoffset);
+    camera_.matrix = camera_.camera.ToViewProjection();
     TRACE("Updated fovy_degrees_: {}", camera_.camera.fovy_degrees);
 }
 
