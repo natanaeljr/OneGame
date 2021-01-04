@@ -13,16 +13,16 @@ namespace firstgame::render {
 
 class CameraPerspective final {
    public:
-    explicit CameraPerspective(util::SizeT<float> size) : aspect_ratio_(size.width / size.height)
+    explicit CameraPerspective(util::SizeT<float> size)
+        : aspect_ratio_(size.width / size.height),
+          matrix_{ .view = CalculateView(), .projection = CalculateProjection() }
     {
-        UpdateView();
-        UpdateProjection();
     }
 
     void Resize(util::SizeT<float> size)
     {
         aspect_ratio_ = size.width / size.height;
-        UpdateProjection();
+        matrix_.projection = CalculateProjection();
     }
 
     void Zoom(float offset)
@@ -31,7 +31,7 @@ class CameraPerspective final {
         fov_degrees_ -= offset * kZoomSpeed;
         fov_degrees_ = std::min(fov_degrees_, 45.0f);
         fov_degrees_ = std::max(fov_degrees_, 1.0f);
-        UpdateProjection();
+        matrix_.projection = CalculateProjection();
     }
 
     void Rotate(float xoffset, float yoffset)
@@ -50,7 +50,7 @@ class CameraPerspective final {
         front_ = glm::normalize(front_);
         right_ = glm::normalize(glm::cross(front_, kWorldUp));
         up_ = glm::normalize(glm::cross(right_, front_));
-        UpdateView();
+        matrix_.view = CalculateView();
     }
 
     void Translate(util::MoveDirection direction, float deltatime)
@@ -65,20 +65,19 @@ class CameraPerspective final {
             case util::MoveDirection::Up: position_ += (up_ * velocity); break;
             case util::MoveDirection::Down: position_ -= (up_ * velocity); break;
         }
-        UpdateView();
+        matrix_.view = CalculateView();
     }
 
     [[nodiscard]] const ViewProjection& Matrix() const { return matrix_; }
 
    private:
-    void UpdateView()
+    glm::mat4 CalculateView() const
     {
-        matrix_.view = glm::lookAt(position_, position_ + front_, up_);  //
+        return glm::lookAt(position_, position_ + front_, up_);  //
     }
-    void UpdateProjection()
+    glm::mat4 CalculateProjection() const
     {
-        matrix_.projection =
-            glm::perspective(glm::radians(fov_degrees_), aspect_ratio_, +1.0f, -1.0f);
+        return glm::perspective(glm::radians(fov_degrees_), aspect_ratio_, +1.0f, -1.0f);
     }
 
    private:
