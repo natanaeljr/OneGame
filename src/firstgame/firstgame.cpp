@@ -41,7 +41,8 @@ class FirstGameImpl final : public FirstGame {
 
 FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logger> logger,
                              std::shared_ptr<platform::FileSystem> filesystem)
-    : system_(std::move(logger), std::move(filesystem)), renderer_({ width, height })
+    : system_(std::move(logger), std::move(filesystem)),
+      renderer_({ util::Width(width), util::Height(height) })
 {
     TRACE("Created FirstGameImpl");
 
@@ -116,7 +117,8 @@ void FirstGameImpl::OnEvent(const event::Event& event)
                                },
                                [this](const event::WindowEvent::Resize& resize) {
                                    TRACE("Event Received: Window::Resize");
-                                   renderer_.OnResize({ resize.width, resize.height });
+                                   renderer_.OnResize(
+                                       { util::Width(resize.width), util::Height(resize.height) });
                                },
                            },
                            window_event.variant);

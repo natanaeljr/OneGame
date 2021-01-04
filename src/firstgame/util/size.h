@@ -11,7 +11,11 @@ struct WidthT {
     static_assert(std::is_arithmetic_v<T>);
     using type = T;
 
-    WidthT(T width) : width(width) {}
+    explicit WidthT(T width) : width(width) {}
+    template<typename U>
+    explicit WidthT(U width) : width(static_cast<T>(width))
+    {
+    }
     operator T() const { return width; }
 
     WidthT(WidthT&&) noexcept = default;
@@ -43,7 +47,11 @@ struct HeightT {
     static_assert(std::is_arithmetic_v<T>);
     using type = T;
 
-    HeightT(T height) : height(height) {}
+    explicit HeightT(T height) : height(height) {}
+    template<typename U>
+    explicit HeightT(U height) : height(static_cast<T>(height))
+    {
+    }
     operator T() const { return height; }
 
     HeightT(HeightT&&) noexcept = default;
@@ -78,10 +86,11 @@ struct SizeT {
     WidthT<T> width;
     HeightT<T> height;
 
-    SizeT(T width, T height) : width(width), height(height) {}
+    SizeT(WidthT<T> width, HeightT<T> height) : width(width), height(height) {}
 
     template<typename U>
-    SizeT(U width, U height) : width(static_cast<T>(width)), height(static_cast<T>(height))
+    SizeT(WidthT<U> width, HeightT<U> height)
+        : width(static_cast<T>(width)), height(static_cast<T>(height))
     {
     }
 
