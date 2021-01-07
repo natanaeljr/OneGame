@@ -68,10 +68,16 @@ RendererImpl::~RendererImpl()
 
 void RendererImpl::Render(const entt::registry& registry)
 {
+    // settings
+    glEnable(GL_DEPTH);
+    // clear buffers
+    glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // program
     glUseProgram(shader_->program);
-
+    // uniforms
     camera_.Render(RenderPass::_3D);
-
+    // objects
     auto view = registry.view<const Transform, const Renderable>();
     view.each([this](const auto& transform, const auto& renderable) {
         auto model = glm::mat4(1.0f);

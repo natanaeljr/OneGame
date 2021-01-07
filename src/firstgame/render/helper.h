@@ -8,6 +8,8 @@ namespace firstgame::render {
 
 Renderable GenerateQuad();
 
+Renderable GenerateCube();
+
 Renderable GenerateRenderable(gsl::span<const float> vertices,
                                         gsl::span<const unsigned short> indices);
 
