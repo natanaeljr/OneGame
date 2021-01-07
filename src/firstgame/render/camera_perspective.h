@@ -1,3 +1,8 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// This file defines a Perspective Camera class with an interface that handles input events and
+/// generates a resulting ViewProjection matrix for the rendering of a 3D scene.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #ifndef FIRSTGAME_RENDER_CAMERA_PERSPECTIVE_H_
 #define FIRSTGAME_RENDER_CAMERA_PERSPECTIVE_H_
 
@@ -11,6 +16,10 @@
 
 namespace firstgame::render {
 
+/// Perspective Camera provides projection of a 3D scene that mimics the way the human eye sees.
+/// The interface is designed to respond to input events filtered by a camera system.
+/// As result, the View and Projection matrices are generated and can be then retrieved by the
+/// Get method for the rendering pass.
 class CameraPerspective final {
    public:
     explicit CameraPerspective(util::SizeT<float> size)
@@ -71,11 +80,11 @@ class CameraPerspective final {
     [[nodiscard]] const ViewProjection& Matrix() const { return matrix_; }
 
    private:
-    glm::mat4 CalculateView() const
+    [[nodiscard]] glm::mat4 CalculateView() const
     {
         return glm::lookAt(position_, position_ + front_, up_);  //
     }
-    glm::mat4 CalculateProjection() const
+    [[nodiscard]] glm::mat4 CalculateProjection() const
     {
         return glm::perspective(glm::radians(fov_degrees_), aspect_ratio_, +1.0f, -1.0f);
     }

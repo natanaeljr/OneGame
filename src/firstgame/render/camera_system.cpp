@@ -1,3 +1,8 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// Camera System's definitions.
+/// For documentation, see the header file.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include "camera_system.h"
 
 #include <glm/gtc/type_ptr.hpp>
@@ -15,7 +20,7 @@ void CameraSystem::Render(RenderPass pass) const
             case RenderPass::_2D: return orthographic_.Matrix();
             case RenderPass::_3D: return perspective_.Matrix();
         }
-        abort();
+        abort();  //< unreachable
     }();
 
     glUniformMatrix4fv(ShaderUniform::View.location(), 1, GL_FALSE, glm::value_ptr(matrix.view));

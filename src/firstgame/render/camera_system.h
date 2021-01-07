@@ -1,3 +1,8 @@
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/// This file defines a camera system for controlling all cameras needed in the engine.
+/// It is therefore made available an interface for lettings events control the cameras.
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
 #ifndef FIRSTGAME_RENDER_CAMERA_SYSTEM_H_
 #define FIRSTGAME_RENDER_CAMERA_SYSTEM_H_
 
@@ -9,6 +14,10 @@
 
 namespace firstgame::render {
 
+/// Camera System encapsulates the various cameras inside a class.
+/// The interface acts as a bridge between the event system handling and the camera objects.
+/// Therefore, data common to all cameras are stored here, then Higher-level code manipulates
+/// the camera array through this interface, independently of the camera types.
 class CameraSystem {
    public:
     explicit CameraSystem(util::Size size) : perspective_(size), orthographic_(size) {}
@@ -19,15 +28,18 @@ class CameraSystem {
         perspective_.Resize(size);
         orthographic_.Resize(size);
     }
+
     void OnZoom(float offset)
     {
         perspective_.Zoom(offset);
         orthographic_.Zoom(offset);
     }
+
     void OnMove(util::MoveDirection direction, float deltatime)
     {
         perspective_.Translate(direction, deltatime);
     }
+
     void OnPoint(float xpos, float ypos)
     {
         if (last_xpos == 0 && last_ypos == 0) {
