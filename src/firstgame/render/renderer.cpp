@@ -69,7 +69,8 @@ RendererImpl::~RendererImpl()
 void RendererImpl::Render(const entt::registry& registry)
 {
     // settings
-    glEnable(GL_DEPTH);
+    glEnable(GL_DEPTH_TEST);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     // clear buffers
     glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -87,6 +88,8 @@ void RendererImpl::Render(const entt::registry& registry)
         glBindVertexArray(renderable.vao);
         glDrawElements(GL_TRIANGLES, renderable.num_vertices, GL_UNSIGNED_SHORT, nullptr);
     });
+    // undo
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 /**************************************************************************************************/

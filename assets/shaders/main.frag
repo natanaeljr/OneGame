@@ -1,10 +1,11 @@
 #version 330 core
+#extension GL_ARB_separate_shader_objects : require
 
-in vec4 color;
+layout(location = 2) in vec4 inColor;
 
-out vec4 FragColor;
+out vec4 outColor;
 
 void main()
 {
-    FragColor = color;
+    outColor = inColor;
 }

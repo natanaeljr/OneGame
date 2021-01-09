@@ -10,9 +10,6 @@ Renderable GenerateQuad();
 
 Renderable GenerateCube();
 
-Renderable GenerateRenderable(gsl::span<const float> vertices,
-                                        gsl::span<const unsigned short> indices);
-
 }  // namespace firstgame::render
 
 #endif  // FIRSTGAME_RENDER_HELPER_H_

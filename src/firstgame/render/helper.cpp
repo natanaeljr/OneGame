@@ -1,12 +1,21 @@
 #include "helper.h"
 
+#include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 #include "firstgame/opengl/gl.h"
 #include "firstgame/system/log.h"
 
-// TODO: temporary
 #include "shader_variables.h"
 
 namespace firstgame::render {
+
+struct Vertex {
+    glm::vec3 position;
+    glm::vec4 color;
+};
+
+Renderable GenerateRenderable(gsl::span<const Vertex> vertices,
+                              gsl::span<const unsigned short> indices);
 
 /**************************************************************************************************/
 
@@ -15,12 +24,13 @@ namespace firstgame::render {
 
 Renderable GenerateQuad()
 {
-    static constexpr GLfloat vertices[] = {
-        // X      Y      Z
-        -1.0f, -1.0f, +0.0f,  //
-        -1.0f, +1.0f, +0.0f,  //
-        +1.0f, -1.0f, +0.0f,  //
-        +1.0f, +1.0f, +0.0f,  //
+    static constexpr Vertex vertices[] = {
+        // clang-format off
+        { .position = { -1.0f, -1.0f, +0.0f }, .color = { 0.0f, 0.5f, 0.5f, 1.0f } },
+        { .position = { -1.0f, +1.0f, +0.0f }, .color = { 0.5f, 0.5f, 0.0f, 1.0f } },
+        { .position = { +1.0f, -1.0f, +0.0f }, .color = { 0.0f, 1.0f, 1.0f, 1.0f } },
+        { .position = { +1.0f, +1.0f, +0.0f }, .color = { 1.0f, 1.5f, 0.0f, 1.0f } },
+        // clang-format on
     };
     static constexpr GLushort indices[] = {
         0, 1, 2,  //
@@ -45,16 +55,17 @@ Renderable GenerateCube()
     //    o - - - - - - > X
     // (-1,-1)       (+1,-1)
     // positive Z goes through screen towards you
-    static constexpr GLfloat vertices[] = {
-        // X      Y      Z
-        -1.0f, -1.0f, +1.0f,  // [0] A front
-        -1.0f, +1.0f, +1.0f,  // [1] B front
-        +1.0f, -1.0f, +1.0f,  // [2] C front
-        +1.0f, +1.0f, +1.0f,  // [3] D front
-        -1.0f, -1.0f, -1.0f,  // [4] A back
-        -1.0f, +1.0f, -1.0f,  // [5] B back
-        +1.0f, -1.0f, -1.0f,  // [6] C back
-        +1.0f, +1.0f, -1.0f,  // [7] D back
+    static constexpr Vertex vertices[] = {
+        // clang-format off
+        { .position = { -1.0f, -1.0f, +1.0f }, .color = { 0.0f, 0.5f, 0.5f, 1.0f } },  // [0] A front
+        { .position = { -1.0f, +1.0f, +1.0f }, .color = { 0.5f, 0.5f, 0.0f, 1.0f } },  // [1] B front
+        { .position = { +1.0f, -1.0f, +1.0f }, .color = { 0.0f, 1.0f, 0.0f, 1.0f } },  // [2] C front
+        { .position = { +1.0f, +1.0f, +1.0f }, .color = { 0.5f, 0.0f, 0.5f, 1.0f } },  // [3] D front
+        { .position = { -1.0f, -1.0f, -1.0f }, .color = { 0.0f, 0.0f, 1.0f, 1.0f } },  // [4] A back
+        { .position = { -1.0f, +1.0f, -1.0f }, .color = { 1.0f, 0.0f, 0.0f, 1.0f } },  // [5] B back
+        { .position = { +1.0f, -1.0f, -1.0f }, .color = { 1.0f, 0.0f, 1.0f, 1.0f } },  // [6] C back
+        { .position = { +1.0f, +1.0f, -1.0f }, .color = { 1.0f, 1.0f, 0.0f, 1.0f } },  // [7] D back
+        // clang-format on
     };
     static constexpr GLushort indices[] = {
         0, 1, 2, 2, 1, 3,  // Front
@@ -69,7 +80,7 @@ Renderable GenerateCube()
 
 /**************************************************************************************************/
 
-Renderable GenerateRenderable(gsl::span<const float> vertices,
+Renderable GenerateRenderable(gsl::span<const Vertex> vertices,
                               gsl::span<const unsigned short> indices)
 {
     ASSERT(indices.size() <= std::numeric_limits<unsigned short>::max());
@@ -79,8 +90,11 @@ Renderable GenerateRenderable(gsl::span<const float> vertices,
     glBindBuffer(GL_ARRAY_BUFFER, renderable.vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size_bytes(), vertices.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(ShaderVertexAttrib::Position.location(), 3, GL_FLOAT, GL_FALSE,
-                          3 * sizeof(float), nullptr);
+                          sizeof(Vertex), (void*) offsetof(Vertex, position));
     glEnableVertexAttribArray(ShaderVertexAttrib::Position.location());
+    glVertexAttribPointer(ShaderVertexAttrib::Color.location(), 4, GL_FLOAT, GL_FALSE,
+                          sizeof(Vertex), (void*) offsetof(Vertex, color));
+    glEnableVertexAttribArray(ShaderVertexAttrib::Color.location());
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderable.ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size_bytes(), indices.data(), GL_STATIC_DRAW);
     return renderable;

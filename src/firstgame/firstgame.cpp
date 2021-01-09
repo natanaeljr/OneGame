@@ -58,14 +58,14 @@ FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logg
     // }
 
     // Generate Single Quad
-    // entt::handle quad{ registry_, registry_.create() };
-    // quad.emplace<render::Renderable>(render::GenerateQuad());
-    // quad.emplace<render::Transform>(render::Transform{
-    //     .position = glm::vec3(0.0f),
-    //     .scale = glm::vec3(1.0f),
-    // });
+    entt::handle quad{ registry_, registry_.create() };
+    quad.emplace<render::Renderable>(render::GenerateQuad());
+    quad.emplace<render::Transform>(render::Transform{
+        .position = glm::vec3(0.0f, 0.0f, 10.0f),
+        .scale = glm::vec3(1.0f),
+    });
 
-    // Generate a Cube
+    // Generate Cube
     entt::handle cube{ registry_, registry_.create() };
     cube.emplace<render::Renderable>(render::GenerateCube());
     cube.emplace<render::Transform>(render::Transform{
