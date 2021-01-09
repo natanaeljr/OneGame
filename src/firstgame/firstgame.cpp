@@ -12,6 +12,7 @@
 #include "firstgame/system/log.h"
 #include "firstgame/system/system.h"
 #include "firstgame/render/helper.h"
+#include "firstgame/render/painter.h"
 #include "firstgame/render/renderer.h"
 #include "firstgame/render/renderable.h"
 #include "firstgame/render/transform.h"
@@ -26,7 +27,7 @@ class FirstGameImpl final : public FirstGame {
    public:
     explicit FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logger> logger,
                            std::shared_ptr<platform::FileSystem> filesystem);
-    void Update(unsigned int timestep) override;
+    void Update(float deltatime) override;
     void OnImGuiRender() override;
     void OnEvent(const event::Event& event) override;
     ~FirstGameImpl() override;
@@ -63,6 +64,7 @@ FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logg
     quad.emplace<render::Transform>(render::Transform{
         .position = glm::vec3(0.0f, 0.0f, 10.0f),
         .scale = glm::vec3(1.0f),
+        .rotation = glm::quat(),
     });
 
     // Generate Cube
@@ -71,12 +73,13 @@ FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logg
     cube.emplace<render::Transform>(render::Transform{
         .position = glm::vec3(0.0f),
         .scale = glm::vec3(1.0f),
+        .rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
     });
 }
 
 /**************************************************************************************************/
 
-void FirstGameImpl::Update(unsigned int timestep)
+void FirstGameImpl::Update(float deltatime)
 {
     renderer_.Render(registry_);
 }

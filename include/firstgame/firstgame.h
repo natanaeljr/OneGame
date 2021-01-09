@@ -14,7 +14,7 @@ class FirstGame {
     static auto New(int width, int height, std::shared_ptr<spdlog::logger> logger,
                     std::shared_ptr<platform::FileSystem> filesystem) -> std::unique_ptr<FirstGame>;
     // Interface
-    virtual void Update(unsigned int timestep) = 0;
+    virtual void Update(float deltatime) = 0;
     virtual void OnImGuiRender() = 0;
     virtual void OnEvent(const event::Event& event) = 0;
     // Destructor

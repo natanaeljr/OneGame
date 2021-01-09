@@ -4,6 +4,7 @@
 #include <string_view>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <entt/entity/registry.hpp>
 
@@ -80,10 +81,11 @@ void RendererImpl::Render(const entt::registry& registry)
     camera_.Render(RenderPass::_3D);
     // objects
     auto view = registry.view<const Transform, const Renderable>();
-    view.each([this](const auto& transform, const auto& renderable) {
-        auto model = glm::mat4(1.0f);
-        model = glm::translate(model, transform.position);
-        model = glm::scale(model, transform.scale);
+    view.each([this](const Transform& transform, const Renderable& renderable) {
+        glm::mat4 translation = glm::translate(glm::mat4(1.0f), transform.position);
+        glm::mat4 rotation = glm::toMat4(transform.rotation);
+        glm::mat4 scale = glm::scale(glm::mat4(1.0f), transform.scale);
+        glm::mat4 model = translation * rotation * scale;
         glUniformMatrix4fv(ShaderUniform::Model.location(), 1, GL_FALSE, glm::value_ptr(model));
         glBindVertexArray(renderable.vao);
         glDrawElements(GL_TRIANGLES, renderable.num_vertices, GL_UNSIGNED_SHORT, nullptr);
