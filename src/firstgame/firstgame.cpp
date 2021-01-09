@@ -8,13 +8,10 @@
 #include <entt/entity/registry.hpp>
 #include <imgui/imgui.h>
 #include <firstgame/render/motion.h>
-// temporary
-#include <GLFW/glfw3.h>
 
 #include "firstgame/event/event.h"
 #include "firstgame/system/log.h"
 #include "firstgame/system/system.h"
-#include "firstgame/render/helper.h"
 #include "firstgame/render/painter.h"
 #include "firstgame/render/renderer.h"
 #include "firstgame/render/renderable.h"

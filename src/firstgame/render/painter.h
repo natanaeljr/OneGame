@@ -1,7 +1,6 @@
-#ifndef FIRSTGAME_RENDER_HELPER_H_
-#define FIRSTGAME_RENDER_HELPER_H_
+#ifndef FIRSTGAME_RENDER_PAINTER_H_
+#define FIRSTGAME_RENDER_PAINTER_H_
 
-#include <gsl/span>
 #include "renderable.h"
 
 namespace firstgame::render {
@@ -12,4 +11,4 @@ Renderable GenerateCube();
 
 }  // namespace firstgame::render
 
-#endif  // FIRSTGAME_RENDER_HELPER_H_
+#endif  // FIRSTGAME_RENDER_PAINTER_H_

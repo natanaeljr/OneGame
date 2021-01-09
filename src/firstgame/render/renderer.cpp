@@ -1,7 +1,6 @@
 #include "renderer.h"
 
 #include <new>
-#include <string_view>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -15,9 +14,7 @@
 #include "firstgame/util/scoped.h"
 #include "firstgame/util/filesystem_literals.h"
 
-#include "camera_orthographic.h"
 #include "camera_perspective.h"
-#include "view_projection.h"
 #include "renderable.h"
 #include "transform.h"
 #include "shader_variables.h"
@@ -81,7 +78,7 @@ void RendererImpl::Render(const entt::registry& registry)
     camera_.Render(RenderPass::_3D);
     // objects
     auto view = registry.view<const Transform, const Renderable>();
-    view.each([this](const Transform& transform, const Renderable& renderable) {
+    view.each([](const Transform& transform, const Renderable& renderable) {
         glm::mat4 translation = glm::translate(glm::mat4(1.0f), transform.position);
         glm::mat4 rotation = glm::toMat4(transform.rotation);
         glm::mat4 scale = glm::scale(glm::mat4(1.0f), transform.scale);
