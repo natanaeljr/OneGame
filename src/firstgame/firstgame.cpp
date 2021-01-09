@@ -7,6 +7,9 @@
 #include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 #include <imgui/imgui.h>
+#include <firstgame/render/motion.h>
+// temporary
+#include <GLFW/glfw3.h>
 
 #include "firstgame/event/event.h"
 #include "firstgame/system/log.h"
@@ -66,6 +69,10 @@ FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logg
         .scale = glm::vec3(1.0f),
         .rotation = glm::quat(1.0f, glm::vec3(0.0f)),
     });
+    quad.emplace<render::Motion>(render::Motion{
+        .velocity = 90.0f,
+        .acceleration = 0.0f,
+    });
 
     // Generate Cube
     entt::handle cube{ registry_, registry_.create() };
@@ -75,16 +82,20 @@ FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logg
         .scale = glm::vec3(1.0f),
         .rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
     });
+    cube.emplace<render::Motion>(render::Motion{
+        .velocity = 40.0f,
+        .acceleration = 20.0f,
+    });
 }
 
 /**************************************************************************************************/
 
 void FirstGameImpl::Update(float deltatime)
 {
-    auto view = registry_.view<render::Transform>();
-    view.each([deltatime](render::Transform& transform) {
-        static constexpr float kSpeedDegrees = 20.0f;
-        float degrees = kSpeedDegrees * deltatime;
+    auto view = registry_.view<render::Transform, render::Motion>();
+    view.each([deltatime](render::Transform& transform, render::Motion& motion) {
+        motion.velocity += motion.acceleration * deltatime;
+        float degrees = motion.velocity * deltatime;
         transform.rotation *= glm::angleAxis(glm::radians(degrees), glm::vec3(0.0f, 0.0f, 1.0f));
     });
 
