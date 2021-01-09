@@ -64,7 +64,7 @@ FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logg
     quad.emplace<render::Transform>(render::Transform{
         .position = glm::vec3(0.0f, 0.0f, 10.0f),
         .scale = glm::vec3(1.0f),
-        .rotation = glm::quat(),
+        .rotation = glm::quat(1.0f, glm::vec3(0.0f)),
     });
 
     // Generate Cube
@@ -81,6 +81,13 @@ FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logg
 
 void FirstGameImpl::Update(float deltatime)
 {
+    auto view = registry_.view<render::Transform>();
+    view.each([deltatime](render::Transform& transform) {
+        static constexpr float kSpeedDegrees = 20.0f;
+        float degrees = kSpeedDegrees * deltatime;
+        transform.rotation *= glm::angleAxis(glm::radians(degrees), glm::vec3(0.0f, 0.0f, 1.0f));
+    });
+
     renderer_.Render(registry_);
 }
 

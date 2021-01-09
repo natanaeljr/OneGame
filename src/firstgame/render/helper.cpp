@@ -57,14 +57,14 @@ Renderable GenerateCube()
     // positive Z goes through screen towards you
     static constexpr Vertex vertices[] = {
         // clang-format off
-        { .position = { -1.0f, -1.0f, +1.0f }, .color = { 0.0f, 0.5f, 0.5f, 1.0f } },  // [0] A front
-        { .position = { -1.0f, +1.0f, +1.0f }, .color = { 0.5f, 0.5f, 0.0f, 1.0f } },  // [1] B front
-        { .position = { +1.0f, -1.0f, +1.0f }, .color = { 0.0f, 1.0f, 0.0f, 1.0f } },  // [2] C front
-        { .position = { +1.0f, +1.0f, +1.0f }, .color = { 0.5f, 0.0f, 0.5f, 1.0f } },  // [3] D front
-        { .position = { -1.0f, -1.0f, -1.0f }, .color = { 0.0f, 0.0f, 1.0f, 1.0f } },  // [4] A back
-        { .position = { -1.0f, +1.0f, -1.0f }, .color = { 1.0f, 0.0f, 0.0f, 1.0f } },  // [5] B back
-        { .position = { +1.0f, -1.0f, -1.0f }, .color = { 1.0f, 0.0f, 1.0f, 1.0f } },  // [6] C back
-        { .position = { +1.0f, +1.0f, -1.0f }, .color = { 1.0f, 1.0f, 0.0f, 1.0f } },  // [7] D back
+        { .position = { -1.0f, -1.0f, +1.0f }, .color = { 1.0f, 1.0f, 0.0f, 1.0f } },  // [0] A front
+        { .position = { -1.0f, +1.0f, +1.0f }, .color = { 1.0f, 0.0f, 1.0f, 1.0f } },  // [1] B front
+        { .position = { +1.0f, -1.0f, +1.0f }, .color = { 1.0f, 0.0f, 0.0f, 1.0f } },  // [2] C front
+        { .position = { +1.0f, +1.0f, +1.0f }, .color = { 0.0f, 0.0f, 1.0f, 1.0f } },  // [3] D front
+        { .position = { -1.0f, -1.0f, -1.0f }, .color = { 0.5f, 0.0f, 0.5f, 1.0f } },  // [4] A back
+        { .position = { -1.0f, +1.0f, -1.0f }, .color = { 0.0f, 1.0f, 0.0f, 1.0f } },  // [5] B back
+        { .position = { +1.0f, -1.0f, -1.0f }, .color = { 0.5f, 0.5f, 0.0f, 1.0f } },  // [6] C back
+        { .position = { +1.0f, +1.0f, -1.0f }, .color = { 0.0f, 0.5f, 0.5f, 1.0f } },  // [7] D back
         // clang-format on
     };
     static constexpr GLushort indices[] = {
