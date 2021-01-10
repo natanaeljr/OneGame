@@ -15,16 +15,23 @@ struct RenderableInstanced final {
     opengl::Buffer vbo{};       ///< vertex buffer
     opengl::Buffer ibo{};       ///< instance buffer
     opengl::Buffer ebo{};       ///< element buffer
-    unsigned short num_vertices{};
+    unsigned short num_indices{};
     unsigned int num_instances{};
 
     /// Create and generate the buffer objects on GPU
-    explicit RenderableInstanced(unsigned short num_vertices) : num_vertices(num_vertices) {}
+    explicit RenderableInstanced(unsigned short num_indices, unsigned int num_instances)
+        : num_indices(num_indices), num_instances(num_instances)
+    {
+    }
 
     /// Create from existing objects
     RenderableInstanced(opengl::VertexArray&& vao, opengl::Buffer&& vbo, opengl::Buffer&& ebo,
-                        unsigned short num_vertices)
-        : vao(std::move(vao)), vbo(std::move(vbo)), ebo(std::move(ebo)), num_vertices(num_vertices)
+                        unsigned short num_indices, unsigned int num_instances)
+        : vao(std::move(vao)),
+          vbo(std::move(vbo)),
+          ebo(std::move(ebo)),
+          num_indices(num_indices),
+          num_instances(num_instances)
     {
     }
 
@@ -38,7 +45,7 @@ struct RenderableInstanced final {
           vbo(opengl::Buffer::Null{}),
           ibo(opengl::Buffer::Null{}),
           ebo(opengl::Buffer::Null{}),
-          num_vertices(0),
+          num_indices(0),
           num_instances(0)
     {
     }
@@ -52,7 +59,7 @@ struct RenderableInstanced final {
     RenderableInstanced& operator=(const RenderableInstanced&) = delete;
 
     /// Transform to std::tie
-    [[nodiscard]] inline auto tie() const { return std::tie(vao, vbo, ebo, num_vertices); }
+    [[nodiscard]] inline auto tie() const { return std::tie(vao, vbo, ebo, num_indices); }
 
     /// Equality operator
     bool operator==(const RenderableInstanced& other) const { return this->tie() == other.tie(); }

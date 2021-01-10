@@ -3,6 +3,9 @@
 #include <gsl/span>
 #include <glm/vec3.hpp>
 #include <glm/vec4.hpp>
+#include <glm/mat4x4.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include "firstgame/opengl/gl.h"
 #include "firstgame/system/log.h"
 
@@ -15,8 +18,16 @@ struct Vertex {
     glm::vec4 color;
 };
 
+struct Instance {
+    glm::mat4 model;
+};
+
 Renderable GenerateRenderable(gsl::span<const Vertex> vertices,
                               gsl::span<const unsigned short> indices);
+
+RenderableInstanced GenerateRenderableInstanced(gsl::span<const Vertex> vertices,
+                                                gsl::span<const unsigned short> indices,
+                                                gsl::span<const Instance> instances);
 
 /**************************************************************************************************/
 
@@ -81,6 +92,48 @@ Renderable GenerateCube()
 
 /**************************************************************************************************/
 
+RenderableInstanced GenerateCubeInstanced(unsigned int rows, unsigned int cols)
+{
+    static constexpr Vertex vertices[] = {
+        // clang-format off
+        { .position = { -1.0f, -1.0f, +1.0f }, .color = { 1.0f, 1.0f, 0.0f, 1.0f } },  // [0] A front
+        { .position = { -1.0f, +1.0f, +1.0f }, .color = { 1.0f, 0.0f, 1.0f, 1.0f } },  // [1] B front
+        { .position = { +1.0f, -1.0f, +1.0f }, .color = { 1.0f, 0.0f, 0.0f, 1.0f } },  // [2] C front
+        { .position = { +1.0f, +1.0f, +1.0f }, .color = { 0.0f, 0.0f, 1.0f, 1.0f } },  // [3] D front
+        { .position = { -1.0f, -1.0f, -1.0f }, .color = { 0.5f, 0.0f, 0.5f, 1.0f } },  // [4] A back
+        { .position = { -1.0f, +1.0f, -1.0f }, .color = { 0.0f, 1.0f, 0.0f, 1.0f } },  // [5] B back
+        { .position = { +1.0f, -1.0f, -1.0f }, .color = { 0.5f, 0.5f, 0.0f, 1.0f } },  // [6] C back
+        { .position = { +1.0f, +1.0f, -1.0f }, .color = { 0.0f, 0.5f, 0.5f, 1.0f } },  // [7] D back
+        // clang-format on
+    };
+    static constexpr GLushort indices[] = {
+        0, 1, 2, 2, 1, 3,  // Front
+        4, 5, 6, 6, 5, 7,  // Back
+        1, 5, 3, 3, 5, 7,  // Top
+        0, 4, 2, 2, 4, 6,  // Bottom
+        4, 5, 0, 0, 5, 1,  // Left
+        6, 7, 2, 2, 7, 3,  // Right
+    };
+    std::vector<Instance> instances{ rows * cols };
+    for (unsigned int i = 0; i < rows; i++) {
+        for (unsigned int j = 0; j < cols; j++) {
+            const auto index = (i * cols + j);
+            instances[index] = {
+                .model =
+                    [i, j] {
+                        glm::mat4 translation =
+                            glm::translate(glm::mat4(1.0f), glm::vec3(float(i), -3.0f, float(j)));
+                        glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
+                        return translation * scale;
+                    }(),
+            };
+        }
+    }
+    return GenerateRenderableInstanced(vertices, indices, instances);
+}
+
+/**************************************************************************************************/
+
 Renderable GenerateRenderable(gsl::span<const Vertex> vertices,
                               gsl::span<const unsigned short> indices)
 {
@@ -96,6 +149,60 @@ Renderable GenerateRenderable(gsl::span<const Vertex> vertices,
     glVertexAttribPointer(ShaderVertexAttrib::Color.location(), 4, GL_FLOAT, GL_FALSE,
                           sizeof(Vertex), (void*) offsetof(Vertex, color));
     glEnableVertexAttribArray(ShaderVertexAttrib::Color.location());
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderable.ebo);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size_bytes(), indices.data(), GL_STATIC_DRAW);
+    return renderable;
+}
+
+/**************************************************************************************************/
+
+RenderableInstanced GenerateRenderableInstanced(gsl::span<const Vertex> vertices,
+                                                gsl::span<const unsigned short> indices,
+                                                gsl::span<const Instance> instances)
+{
+    ASSERT(indices.size() <= std::numeric_limits<unsigned short>::max());
+    ASSERT(instances.size() <= std::numeric_limits<unsigned int>::max());
+
+    RenderableInstanced renderable{ static_cast<unsigned short>(indices.size()),
+                                    static_cast<unsigned int>(instances.size()) };
+
+    glBindVertexArray(renderable.vao);
+
+    glBindBuffer(GL_ARRAY_BUFFER, renderable.vbo);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size_bytes(), vertices.data(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(ShaderVertexAttrib::Position.location(), 3, GL_FLOAT, GL_FALSE,
+                          sizeof(Vertex), (void*) offsetof(Vertex, position));
+    glEnableVertexAttribArray(ShaderVertexAttrib::Position.location());
+    glVertexAttribPointer(ShaderVertexAttrib::Color.location(), 4, GL_FLOAT, GL_FALSE,
+                          sizeof(Vertex), (void*) offsetof(Vertex, color));
+    glEnableVertexAttribArray(ShaderVertexAttrib::Color.location());
+
+    glBindBuffer(GL_ARRAY_BUFFER, renderable.ibo);
+    glBufferData(GL_ARRAY_BUFFER, instances.size_bytes(), instances.data(), GL_STATIC_DRAW);
+
+    const unsigned model_location = ShaderVertexAttrib::Model.location();
+
+    glVertexAttribPointer(model_location + 0, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
+                          (void*) (0 * sizeof(glm::vec4)));
+    glEnableVertexAttribArray(model_location + 0);
+    glVertexAttribDivisor(model_location + 0, 1);
+
+    glVertexAttribPointer(model_location + 1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
+                          (void*) (1 * sizeof(glm::vec4)));
+    glEnableVertexAttribArray(model_location + 1);
+    glVertexAttribDivisor(model_location + 1, 1);
+
+    glVertexAttribPointer(model_location + 2, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
+                          (void*) (2 * sizeof(glm::vec4)));
+    glEnableVertexAttribArray(model_location + 2);
+    glVertexAttribDivisor(model_location + 2, 1);
+
+    glVertexAttribPointer(model_location + 3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
+                          (void*) (3 * sizeof(glm::vec4)));
+    glEnableVertexAttribArray(model_location + 3);
+    glVertexAttribDivisor(model_location + 3, 1);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderable.ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size_bytes(), indices.data(), GL_STATIC_DRAW);
     return renderable;

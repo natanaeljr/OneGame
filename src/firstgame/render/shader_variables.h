@@ -8,16 +8,18 @@ namespace firstgame::render {
 /// the need for hard-coded Shader information for each shader program written.
 struct ShaderVertexAttrib {
     /// List of all supported vertex attributes for using in Shaders
-    enum class Enum {
+    enum class Enum : unsigned {
         Position = 0,
         TexCoord = 1,
         Color = 2,
+        Model = 8,
     };
 
     /// Declarations in object form for convenience
     static const ShaderVertexAttrib Position;
     static const ShaderVertexAttrib TexCoord;
     static const ShaderVertexAttrib Color;
+    static const ShaderVertexAttrib Model;
 
     /// Get the standardized variable name
     [[nodiscard]] inline constexpr const char* string() const
@@ -26,6 +28,7 @@ struct ShaderVertexAttrib {
             case Enum::Position: return "inPosition";
             case Enum::TexCoord: return "inTexCoord";
             case Enum::Color: return "inColor";
+            case Enum::Model: return "inModel";
         }
         return nullptr;
     }
@@ -54,7 +57,7 @@ struct ShaderVertexAttrib {
 /// need for hard-coded Shader information for each shader program written.
 struct ShaderUniform {
     /// List of all supported uniform variables for using in Shaders
-    enum class Enum {
+    enum class Enum : unsigned {
         Color = 0,
         Model = 1,
         View = 2,
@@ -113,6 +116,7 @@ struct ShaderUniform {
 constexpr ShaderVertexAttrib ShaderVertexAttrib::Position{ ShaderVertexAttrib::Enum::Position };
 constexpr ShaderVertexAttrib ShaderVertexAttrib::TexCoord{ ShaderVertexAttrib::Enum::TexCoord };
 constexpr ShaderVertexAttrib ShaderVertexAttrib::Color{ ShaderVertexAttrib::Enum::Color };
+constexpr ShaderVertexAttrib ShaderVertexAttrib::Model{ ShaderVertexAttrib::Enum::Model };
 
 /// Shader Uniform Objects
 constexpr ShaderUniform ShaderUniform::Color{ ShaderUniform::Enum::Color };

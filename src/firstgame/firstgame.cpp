@@ -59,17 +59,21 @@ FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logg
     // }
 
     // Generate many cubes
-    for (float x = 0; x < 50.0f; x++) {
-        for (float z = 0; z < 50.0f; z++) {
-            entt::handle cube{ registry_, registry_.create() };
-            cube.emplace<render::Renderable>(render::GenerateCube());
-            cube.emplace<render::Transform>(render::Transform{
-                .position = glm::vec3(x, -3.0f, z),
-                .scale = glm::vec3(0.5f),
-                .rotation = glm::quat(1.0f, glm::vec3(0.0f)),
-            });
-        }
-    }
+    // for (float x = 0; x < 100.0f; x++) {
+    //     for (float z = 0; z < 100.0f; z++) {
+    //         entt::handle cube{ registry_, registry_.create() };
+    //         cube.emplace<render::Renderable>(render::GenerateCube());
+    //         cube.emplace<render::Transform>(render::Transform{
+    //             .position = glm::vec3(x, -3.0f, z),
+    //             .scale = glm::vec3(0.5f),
+    //             .rotation = glm::quat(1.0f, glm::vec3(0.0f)),
+    //         });
+    //     }
+    // }
+
+    // Generate instanced cubes
+    entt::handle cube{ registry_, registry_.create() };
+    cube.emplace<render::RenderableInstanced>(render::GenerateCubeInstanced(50, 100));
 
     // Generate Single Quad
     // entt::handle quad{ registry_, registry_.create() };

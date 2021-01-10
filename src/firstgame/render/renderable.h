@@ -14,15 +14,15 @@ struct Renderable final {
     opengl::VertexArray vao{};
     opengl::Buffer vbo{};
     opengl::Buffer ebo{};
-    unsigned short num_vertices{};
+    unsigned short num_indices{};
 
     /// Create and generate the buffer objects on GPU
-    explicit Renderable(unsigned short num_vertices) : num_vertices(num_vertices) {}
+    explicit Renderable(unsigned short num_indices) : num_indices(num_indices) {}
 
     /// Create from existing objects
     Renderable(opengl::VertexArray&& vao, opengl::Buffer&& vbo, opengl::Buffer&& ebo,
                unsigned short num_vertices)
-        : vao(std::move(vao)), vbo(std::move(vbo)), ebo(std::move(ebo)), num_vertices(num_vertices)
+        : vao(std::move(vao)), vbo(std::move(vbo)), ebo(std::move(ebo)), num_indices(num_vertices)
     {
     }
 
@@ -35,7 +35,7 @@ struct Renderable final {
         : vao(opengl::VertexArray::Null{}),
           vbo(opengl::Buffer::Null{}),
           ebo(opengl::Buffer::Null{}),
-          num_vertices(0)
+          num_indices(0)
     {
     }
 
@@ -48,7 +48,7 @@ struct Renderable final {
     Renderable& operator=(const Renderable&) = delete;
 
     /// Transform to std::tie
-    [[nodiscard]] inline auto tie() const { return std::tie(vao, vbo, ebo, num_vertices); }
+    [[nodiscard]] inline auto tie() const { return std::tie(vao, vbo, ebo, num_indices); }
 
     /// Equality operator
     bool operator==(const Renderable& other) const { return this->tie() == other.tie(); }

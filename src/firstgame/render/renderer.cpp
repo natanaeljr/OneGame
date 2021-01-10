@@ -38,21 +38,26 @@ class RendererImpl final {
 
    private:
     CameraSystem camera_;
-    util::Scoped<opengl::Shader> shader_;
+    util::Scoped<opengl::Shader> shader_main_{};
+    util::Scoped<opengl::Shader> shader_instance_{};
 };
 
 /**************************************************************************************************/
 
-RendererImpl::RendererImpl(util::Size size)
-    : camera_(size), shader_([] {
-          using util::filesystem_literals::operator""_path;
-          auto& asset_mgr = system::AssetManager::current();
-          auto vertex = asset_mgr.Open("shaders"_path / "main.vert").Assert()->ReadToString();
-          auto fragment = asset_mgr.Open("shaders"_path / "main.frag").Assert()->ReadToString();
-          return opengl::Shader::Build(vertex.data(), fragment.data()).Assert();
-      }())
+RendererImpl::RendererImpl(util::Size size) : camera_(size)
 {
+    // shaders
+    using util::filesystem_literals::operator""_path;
+    auto& asset_mgr = system::AssetManager::current();
+    auto main_vert = asset_mgr.Open("shaders"_path / "main.vert").Assert()->ReadToString();
+    auto main_frag = asset_mgr.Open("shaders"_path / "main.frag").Assert()->ReadToString();
+    auto instance_vert = asset_mgr.Open("shaders"_path / "instance.vert").Assert()->ReadToString();
+    shader_main_ = opengl::Shader::Build(main_vert.data(), main_frag.data()).Assert();
+    shader_instance_ = opengl::Shader::Build(instance_vert.data(), main_frag.data()).Assert();
+
+    // setup
     OnResize(size);
+
     TRACE("Created RendererImpl");
 }
 
@@ -73,21 +78,36 @@ void RendererImpl::Render(const entt::registry& registry)
     // clear buffers
     glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // program
-    glUseProgram(shader_->program);
-    // uniforms
-    camera_.Render(RenderPass::_3D);
-    // objects
-    auto view = registry.view<const Transform, const Renderable>();
-    view.each([](const Transform& transform, const Renderable& renderable) {
-        glm::mat4 translation = glm::translate(glm::mat4(1.0f), transform.position);
-        glm::mat4 rotation = glm::toMat4(transform.rotation);
-        glm::mat4 scale = glm::scale(glm::mat4(1.0f), transform.scale);
-        glm::mat4 model = translation * rotation * scale;
-        glUniformMatrix4fv(ShaderUniform::Model.location(), 1, GL_FALSE, glm::value_ptr(model));
-        glBindVertexArray(renderable.vao);
-        glDrawElements(GL_TRIANGLES, renderable.num_vertices, GL_UNSIGNED_SHORT, nullptr);
-    });
+    {
+        // program
+        glUseProgram(shader_main_->program);
+        // uniforms
+        camera_.Render(RenderPass::_3D);
+        // objects
+        auto view = registry.view<const Transform, const Renderable>();
+        view.each([](const Transform& transform, const Renderable& renderable) {
+            glm::mat4 translation = glm::translate(glm::mat4(1.0f), transform.position);
+            glm::mat4 rotation = glm::toMat4(transform.rotation);
+            glm::mat4 scale = glm::scale(glm::mat4(1.0f), transform.scale);
+            glm::mat4 model = translation * rotation * scale;
+            glUniformMatrix4fv(ShaderUniform::Model.location(), 1, GL_FALSE, glm::value_ptr(model));
+            glBindVertexArray(renderable.vao);
+            glDrawElements(GL_TRIANGLES, renderable.num_indices, GL_UNSIGNED_SHORT, nullptr);
+        });
+    }
+    {
+        // program
+        glUseProgram(shader_instance_->program);
+        // uniforms
+        camera_.Render(RenderPass::_3D);
+        // objects
+        auto view = registry.view<const RenderableInstanced>();
+        view.each([](const RenderableInstanced& renderable) {
+            glBindVertexArray(renderable.vao);
+            glDrawElementsInstanced(GL_TRIANGLES, renderable.num_indices, GL_UNSIGNED_SHORT,
+                                    nullptr, renderable.num_instances);
+        });
+    }
     // undo
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
