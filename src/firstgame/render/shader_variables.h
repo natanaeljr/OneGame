@@ -12,14 +12,20 @@ struct ShaderVertexAttrib {
         Position = 0,
         TexCoord = 1,
         Color = 2,
-        Model = 8,
+        Model0 = 8,
+        Model1 = 9,
+        Model2 = 10,
+        Model3 = 11,
     };
 
     /// Declarations in object form for convenience
     static const ShaderVertexAttrib Position;
     static const ShaderVertexAttrib TexCoord;
     static const ShaderVertexAttrib Color;
-    static const ShaderVertexAttrib Model;
+    static const ShaderVertexAttrib Model0;
+    static const ShaderVertexAttrib Model1;
+    static const ShaderVertexAttrib Model2;
+    static const ShaderVertexAttrib Model3;
 
     /// Get the standardized variable name
     [[nodiscard]] inline constexpr const char* string() const
@@ -28,7 +34,10 @@ struct ShaderVertexAttrib {
             case Enum::Position: return "inPosition";
             case Enum::TexCoord: return "inTexCoord";
             case Enum::Color: return "inColor";
-            case Enum::Model: return "inModel";
+            case Enum::Model0:
+            case Enum::Model1:
+            case Enum::Model2:
+            case Enum::Model3: return "inModel";
         }
         return nullptr;
     }
@@ -116,7 +125,10 @@ struct ShaderUniform {
 constexpr ShaderVertexAttrib ShaderVertexAttrib::Position{ ShaderVertexAttrib::Enum::Position };
 constexpr ShaderVertexAttrib ShaderVertexAttrib::TexCoord{ ShaderVertexAttrib::Enum::TexCoord };
 constexpr ShaderVertexAttrib ShaderVertexAttrib::Color{ ShaderVertexAttrib::Enum::Color };
-constexpr ShaderVertexAttrib ShaderVertexAttrib::Model{ ShaderVertexAttrib::Enum::Model };
+constexpr ShaderVertexAttrib ShaderVertexAttrib::Model0{ ShaderVertexAttrib::Enum::Model0 };
+constexpr ShaderVertexAttrib ShaderVertexAttrib::Model1{ ShaderVertexAttrib::Enum::Model1 };
+constexpr ShaderVertexAttrib ShaderVertexAttrib::Model2{ ShaderVertexAttrib::Enum::Model2 };
+constexpr ShaderVertexAttrib ShaderVertexAttrib::Model3{ ShaderVertexAttrib::Enum::Model3 };
 
 /// Shader Uniform Objects
 constexpr ShaderUniform ShaderUniform::Color{ ShaderUniform::Enum::Color };

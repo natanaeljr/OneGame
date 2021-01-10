@@ -171,40 +171,27 @@ RenderableInstanced GenerateRenderableInstanced(gsl::span<const Vertex> vertices
     glBindBuffer(GL_ARRAY_BUFFER, renderable.vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size_bytes(), vertices.data(), GL_STATIC_DRAW);
 
+    glEnableVertexAttribArray(ShaderVertexAttrib::Position.location());
     glVertexAttribPointer(ShaderVertexAttrib::Position.location(), 3, GL_FLOAT, GL_FALSE,
                           sizeof(Vertex), (void*) offsetof(Vertex, position));
-    glEnableVertexAttribArray(ShaderVertexAttrib::Position.location());
+    glEnableVertexAttribArray(ShaderVertexAttrib::Color.location());
     glVertexAttribPointer(ShaderVertexAttrib::Color.location(), 4, GL_FLOAT, GL_FALSE,
                           sizeof(Vertex), (void*) offsetof(Vertex, color));
-    glEnableVertexAttribArray(ShaderVertexAttrib::Color.location());
 
     glBindBuffer(GL_ARRAY_BUFFER, renderable.ibo);
     glBufferData(GL_ARRAY_BUFFER, instances.size_bytes(), instances.data(), GL_STATIC_DRAW);
 
-    const unsigned model_location = ShaderVertexAttrib::Model.location();
-
-    glVertexAttribPointer(model_location + 0, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
-                          (void*) (0 * sizeof(glm::vec4)));
-    glEnableVertexAttribArray(model_location + 0);
-    glVertexAttribDivisor(model_location + 0, 1);
-
-    glVertexAttribPointer(model_location + 1, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
-                          (void*) (1 * sizeof(glm::vec4)));
-    glEnableVertexAttribArray(model_location + 1);
-    glVertexAttribDivisor(model_location + 1, 1);
-
-    glVertexAttribPointer(model_location + 2, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
-                          (void*) (2 * sizeof(glm::vec4)));
-    glEnableVertexAttribArray(model_location + 2);
-    glVertexAttribDivisor(model_location + 2, 1);
-
-    glVertexAttribPointer(model_location + 3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
-                          (void*) (3 * sizeof(glm::vec4)));
-    glEnableVertexAttribArray(model_location + 3);
-    glVertexAttribDivisor(model_location + 3, 1);
+    for (unsigned index : { 0, 1, 2, 3 }) {
+        const unsigned location = ShaderVertexAttrib::Model0.location() + index;
+        glEnableVertexAttribArray(location);
+        glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
+                              (void*) (index * sizeof(glm::mat4::col_type)));
+        glVertexAttribDivisor(location, 1);
+    }
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderable.ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size_bytes(), indices.data(), GL_STATIC_DRAW);
+
     return renderable;
 }
 
