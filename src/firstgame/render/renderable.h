@@ -4,52 +4,44 @@
 #include <tuple>
 #include <utility>
 
+#include "firstgame/opengl/vertex_array.h"
+#include "firstgame/opengl/buffer.h"
+
 namespace firstgame::render {
 
 /// Renderable Component contains GPU-uploaded data, ready to be rendered.
 struct Renderable final {
-    unsigned int vao{};
-    unsigned int vbo{};
-    unsigned int ebo{};
+    opengl::VertexArray vao{};
+    opengl::Buffer vbo{};
+    opengl::Buffer ebo{};
     unsigned short num_vertices{};
 
     /// Create and generate the buffer objects on GPU
-    explicit Renderable(unsigned short elements);
+    explicit Renderable(unsigned short num_vertices) : num_vertices(num_vertices) {}
 
     /// Create from existing objects
-    Renderable(unsigned int vao, unsigned int vbo, unsigned int ebo, unsigned short num_vertices)
-        : vao(vao), vbo(vbo), ebo(ebo), num_vertices(num_vertices)
+    Renderable(opengl::VertexArray&& vao, opengl::Buffer&& vbo, opengl::Buffer&& ebo,
+               unsigned short num_vertices)
+        : vao(std::move(vao)), vbo(std::move(vbo)), ebo(std::move(ebo)), num_vertices(num_vertices)
     {
     }
-
-    /// Delete buffer objects if non-zero
-    ~Renderable();
 
     /// For creating a null Renderable
     struct Null {
     };
 
-    /// Create a non-initialized Renderable
-    Renderable(Null) noexcept {}
-
-    /// Move constructor
-    Renderable(Renderable&& other) noexcept
-        : vao(std::exchange(other.vao, 0)),
-          vbo(std::exchange(other.vbo, 0)),
-          ebo(std::exchange(other.ebo, 0)),
-          num_vertices(std::exchange(other.num_vertices, 0))
+    /// Create a null/invalid Renderable
+    Renderable(Null) noexcept
+        : vao(opengl::VertexArray::Null{}),
+          vbo(opengl::Buffer::Null{}),
+          ebo(opengl::Buffer::Null{}),
+          num_vertices(0)
     {
     }
 
-    /// Move Assignment
-    Renderable& operator=(Renderable&& other) noexcept
-    {
-        vao = std::exchange(other.vao, 0);
-        vbo = std::exchange(other.vbo, 0);
-        ebo = std::exchange(other.ebo, 0);
-        num_vertices = std::exchange(other.num_vertices, 0);
-        return *this;
-    }
+    /// Default Move constructor/assignment
+    Renderable(Renderable&& other) noexcept = default;
+    Renderable& operator=(Renderable&& other) noexcept = default;
 
     /// Deleted Copy constructor/assignment
     Renderable(const Renderable&) = delete;

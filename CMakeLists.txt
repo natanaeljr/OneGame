@@ -85,8 +85,9 @@ find_library(Zlib_LIBRARY NAMES zlibstatic zlibstaticd)
 add_library(FirstGame STATIC)
 target_sources(FirstGame PRIVATE
     src/firstgame/firstgame.cpp
+    src/firstgame/opengl/buffer.cpp
+    src/firstgame/opengl/vertex_array.cpp
     src/firstgame/render/renderer.cpp
-    src/firstgame/render/renderable.cpp
     src/firstgame/render/painter.cpp
     src/firstgame/render/camera_system.cpp
     src/firstgame/system/asset_mgr.cpp

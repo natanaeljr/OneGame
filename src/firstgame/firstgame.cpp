@@ -58,31 +58,44 @@ FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logg
     //     });
     // }
 
+    // Generate many cubes
+    for (float x = 0; x < 50.0f; x++) {
+        for (float z = 0; z < 50.0f; z++) {
+            entt::handle cube{ registry_, registry_.create() };
+            cube.emplace<render::Renderable>(render::GenerateCube());
+            cube.emplace<render::Transform>(render::Transform{
+                .position = glm::vec3(x, -3.0f, z),
+                .scale = glm::vec3(0.5f),
+                .rotation = glm::quat(1.0f, glm::vec3(0.0f)),
+            });
+        }
+    }
+
     // Generate Single Quad
-    entt::handle quad{ registry_, registry_.create() };
-    quad.emplace<render::Renderable>(render::GenerateQuad());
-    quad.emplace<render::Transform>(render::Transform{
-        .position = glm::vec3(0.0f, 0.0f, 10.0f),
-        .scale = glm::vec3(1.0f),
-        .rotation = glm::quat(1.0f, glm::vec3(0.0f)),
-    });
-    quad.emplace<render::Motion>(render::Motion{
-        .velocity = 90.0f,
-        .acceleration = 0.0f,
-    });
+    // entt::handle quad{ registry_, registry_.create() };
+    // quad.emplace<render::Renderable>(render::GenerateQuad());
+    // quad.emplace<render::Transform>(render::Transform{
+    //     .position = glm::vec3(0.0f, 0.0f, 10.0f),
+    //     .scale = glm::vec3(1.0f),
+    //     .rotation = glm::quat(1.0f, glm::vec3(0.0f)),
+    // });
+    // quad.emplace<render::Motion>(render::Motion{
+    //     .velocity = 90.0f,
+    //     .acceleration = 0.0f,
+    // });
 
     // Generate Cube
-    entt::handle cube{ registry_, registry_.create() };
-    cube.emplace<render::Renderable>(render::GenerateCube());
-    cube.emplace<render::Transform>(render::Transform{
-        .position = glm::vec3(0.0f),
-        .scale = glm::vec3(1.0f),
-        .rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
-    });
-    cube.emplace<render::Motion>(render::Motion{
-        .velocity = 40.0f,
-        .acceleration = 20.0f,
-    });
+    // entt::handle cube{ registry_, registry_.create() };
+    // cube.emplace<render::Renderable>(render::GenerateCube());
+    // cube.emplace<render::Transform>(render::Transform{
+    //     .position = glm::vec3(0.0f),
+    //     .scale = glm::vec3(1.0f),
+    //     .rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
+    // });
+    // cube.emplace<render::Motion>(render::Motion{
+    //     .velocity = 40.0f,
+    //     .acceleration = 20.0f,
+    // });
 }
 
 /**************************************************************************************************/
