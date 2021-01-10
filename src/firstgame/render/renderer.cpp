@@ -16,6 +16,7 @@
 
 #include "camera_perspective.h"
 #include "renderable.h"
+#include "renderable_instanced.h"
 #include "transform.h"
 #include "shader_variables.h"
 #include "camera_system.h"
