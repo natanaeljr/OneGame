@@ -1,11 +1,13 @@
 #ifndef FIRSTGAME_RENDER_MOTION_H_
 #define FIRSTGAME_RENDER_MOTION_H_
 
+#include <glm/vec3.hpp>
+
 namespace firstgame::render {
 
 struct Motion final {
-    float velocity;
-    float acceleration;
+    glm::vec3 velocity;
+    glm::vec3 acceleration;  // force/mass
 };
 
 }  // namespace firstgame::render
