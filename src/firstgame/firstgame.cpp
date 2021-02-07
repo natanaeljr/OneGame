@@ -33,9 +33,9 @@ class FirstGameImpl final : public FirstGame {
     ~FirstGameImpl() override;
 
    private:
+    entt::registry registry_;
     system::System system_;
     render::Renderer renderer_;
-    entt::registry registry_;
 };
 
 /**************************************************************************************************/
@@ -43,7 +43,7 @@ class FirstGameImpl final : public FirstGame {
 FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logger> logger,
                              std::shared_ptr<platform::FileSystem> filesystem)
     : system_(std::move(logger), std::move(filesystem)),
-      renderer_({ util::Width(width), util::Height(height) })
+      renderer_(registry_, util::Size{ util::Width(width), util::Height(height) })
 {
     TRACE("Created FirstGameImpl");
 
@@ -81,7 +81,7 @@ FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logg
     quad.emplace<render::Transform>(render::Transform{
         .position = glm::vec3(-7.0f, 0.0f, 10.0f),
         .scale = glm::vec3(1.0f),
-        .rotation = glm::quat(1.0f, glm::vec3(0.0f)),
+        .rotation = glm::quat(glm::vec3(0.0f)),
     });
     quad.emplace<render::Motion>(render::Motion{
         .velocity = glm::vec3(0.0f, 0.0f, 40.0f),

@@ -112,6 +112,8 @@ struct SizeT {
 
     [[nodiscard]] constexpr auto tie() const { return std::tie(width, height); }
     [[nodiscard]] constexpr auto tuple() const { return std::make_tuple(width, height); }
+
+    [[nodiscard]] constexpr T aspect_ratio() const { return width / height; }
 };
 
 template<typename T>

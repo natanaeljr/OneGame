@@ -71,7 +71,7 @@ find_package(stb 0.8.1 EXACT REQUIRED COMPONENTS stb_image)
 # Assimp for 3D model loading
 find_package(assimp 5.0.0 EXACT REQUIRED)
 # EnTT for Entity Component System library
-find_package(EnTT 3.5.2 EXACT REQUIRED)
+find_package(EnTT 3.6.0 EXACT REQUIRED)
 
 # IrrXML for Assimp dependency
 find_library(IrrXML_LIBRARY NAMES IrrXML IrrXMLd)

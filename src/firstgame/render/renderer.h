@@ -10,11 +10,11 @@ namespace firstgame::render {
 //! Renderer Interface
 class Renderer final {
    public:
-    explicit Renderer(util::Size size);
+    Renderer(entt::registry &registry, util::Size window_size);
     ~Renderer();
 
     // Interface
-    void Render(const entt::registry& registry);
+    void Render(entt::registry& registry);
     void OnResize(util::Size size);
     void OnScroll(float offset);
     void OnCursorMove(float xpos, float ypos);
@@ -28,7 +28,7 @@ class Renderer final {
 
    private:
     //! Implementation object buffer
-    alignas(4) unsigned char impl_[1024]{};
+    alignas(8) unsigned char impl_[1024]{};
 };
 
 }  // namespace firstgame::render

@@ -84,7 +84,7 @@ class CameraPerspective final {
     }
     [[nodiscard]] glm::mat4 CalculateProjection() const
     {
-        return glm::perspective(glm::radians(fov_degrees_), aspect_ratio_, 0.1f, 100.0f);
+        return glm::perspective(glm::radians(fov_degrees_), aspect_ratio_, 0.1f, 1000.0f);
     }
     [[nodiscard]] glm::vec3 CalculateForward() const
     {

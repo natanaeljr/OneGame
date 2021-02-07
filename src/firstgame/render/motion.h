@@ -6,8 +6,8 @@
 namespace firstgame::render {
 
 struct Motion final {
-    glm::vec3 velocity;
-    glm::vec3 acceleration;  // force/mass
+    glm::vec3 velocity{ 0.0f };
+    glm::vec3 acceleration{ 0.0f };
 };
 
 }  // namespace firstgame::render

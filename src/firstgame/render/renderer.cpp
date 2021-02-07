@@ -6,6 +6,8 @@
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <entt/entity/registry.hpp>
+#include <entt/entity/handle.hpp>
+#include <entt/entity/observer.hpp>
 
 #include "firstgame/opengl/gl.h"
 #include "firstgame/opengl/shader.h"
@@ -21,6 +23,8 @@
 #include "shader_variables.h"
 #include "camera_system.h"
 
+#include "firstgame/camera/camera.h"
+
 namespace firstgame::render {
 
 /**************************************************************************************************/
@@ -28,23 +32,26 @@ namespace firstgame::render {
 //! Renderer Implementation
 class RendererImpl final {
    public:
-    explicit RendererImpl(util::Size size);
+    explicit RendererImpl(entt::registry& registry, util::Size window_size);
     ~RendererImpl();
-    void Render(const entt::registry& registry);
+    void Render(entt::registry& registry);
     void OnResize(util::Size size);
     void OnZoom(float offset);
     void OnCursorMove(float xpos, float ypos);
     void OnKeystroke(event::KeyEvent key_event, float deltatime);
 
    private:
+    entt::registry& registry_;
     CameraSystem camera_;
+    entt::entity camera_entity_;
     util::Scoped<opengl::Shader> shader_main_{};
     util::Scoped<opengl::Shader> shader_instance_{};
 };
 
 /**************************************************************************************************/
 
-RendererImpl::RendererImpl(util::Size size) : camera_(size)
+RendererImpl::RendererImpl(entt::registry& registry, util::Size window_size)
+    : registry_(registry), camera_(window_size)
 {
     // shaders
     using util::filesystem_literals::operator""_path;
@@ -56,7 +63,35 @@ RendererImpl::RendererImpl(util::Size size) : camera_(size)
     shader_instance_ = opengl::Shader::Build(instance_vert.data(), main_frag.data()).Assert();
 
     // setup
-    OnResize(size);
+    OnResize(window_size);
+
+    // camera
+    entt::handle camera{ registry, registry.create() };
+    camera.emplace<camera::Camera>();
+    camera.emplace<camera::Perspective>(camera::Perspective{
+        .aspect_ratio = util::SizeT<float>(window_size).aspect_ratio(),
+        .fov_degrees = 45.0f,
+        .z_near = 0.01f,
+        .z_far = 1000.0f,
+    });
+    camera.emplace<render::Transform>(render::Transform{
+        .position = { 0.0f, 0.0f, 30.0f },
+        .scale = glm::vec3(1.0f),
+        .rotation{ glm::vec3(0.0f) },
+    });
+    camera.emplace<camera::AngularVelocity>(camera::AngularVelocity{
+        .velocity = glm::vec3(1.0f),
+    });
+
+    camera_entity_ = camera.entity();
+
+    // entt::observer observer{ registry, entt::basic_collector<>::update<camera::Camera>() };
+
+    // camera::event_handler_camera_rotation(registry, camera_entity_, 0.0f, 0.5f);
+    camera::updater_perspective_camera(registry);
+
+    //    observer.each(
+    //        [](auto entity) { TRACE("Observed camera::Camera update on entity {}", entity); });
 
     TRACE("Created RendererImpl");
 }
@@ -70,8 +105,16 @@ RendererImpl::~RendererImpl()
 
 /**************************************************************************************************/
 
-void RendererImpl::Render(const entt::registry& registry)
+void RendererImpl::Render(entt::registry& registry)
 {
+    auto RenderCamera = [&] {
+        auto camera = registry.get<camera::Camera>(camera_entity_);
+        glUniformMatrix4fv(ShaderUniform::View.location(), 1, GL_FALSE,
+                           glm::value_ptr(camera.view));
+        glUniformMatrix4fv(ShaderUniform::Projection.location(), 1, GL_FALSE,
+                           glm::value_ptr(camera.projection));
+    };
+
     // settings
     glEnable(GL_DEPTH_TEST);
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
@@ -82,7 +125,8 @@ void RendererImpl::Render(const entt::registry& registry)
         // program
         glUseProgram(shader_main_->program);
         // uniforms
-        camera_.Render(RenderPass::_3D);
+        // camera_.Render(RenderPass::_3D);
+        RenderCamera();
         // objects
         auto view = registry.view<const Transform, const Renderable>();
         view.each([](const Transform& transform, const Renderable& renderable) {
@@ -99,7 +143,8 @@ void RendererImpl::Render(const entt::registry& registry)
         // program
         glUseProgram(shader_instance_->program);
         // uniforms
-        camera_.Render(RenderPass::_3D);
+        // camera_.Render(RenderPass::_3D);
+        RenderCamera();
         // objects
         auto view = registry.view<const RenderableInstanced>();
         view.each([](const RenderableInstanced& renderable) {
@@ -133,6 +178,19 @@ void RendererImpl::OnZoom(float offset)
 void RendererImpl::OnCursorMove(float xpos, float ypos)
 {
     camera_.OnPoint(xpos, ypos);
+
+    static float last_xpos = xpos;
+    static float last_ypos = ypos;
+
+    float xoffset = xpos - last_xpos;
+    float yoffset = ypos - last_ypos;
+
+    camera::event_handler_camera_rotation(registry_, camera_entity_, glm::radians(xoffset * 0.1f),
+                                          glm::radians(yoffset * 0.1f));
+    camera::updater_perspective_camera(registry_);
+
+    last_xpos = xpos;
+    last_ypos = ypos;
 }
 
 /**************************************************************************************************/
@@ -161,14 +219,14 @@ void RendererImpl::OnKeystroke(event::KeyEvent key_event, float deltatime)
 /**************************************************************************************************/
 /**************************************************************************************************/
 
-Renderer::Renderer(util::Size size)
+Renderer::Renderer(entt::registry& registry, util::Size window_size)
 {
     // guarantee same memory alignment of the interface and implementation
     static_assert(alignof(Renderer) == alignof(RendererImpl));
     // guarantee enough space in the implementation object buffer
     static_assert(sizeof(impl_) >= sizeof(RendererImpl));
     // placement new
-    new (impl_) RendererImpl(size);
+    new (impl_) RendererImpl(registry, window_size);
 }
 
 Renderer::~Renderer()
@@ -176,7 +234,7 @@ Renderer::~Renderer()
     reinterpret_cast<RendererImpl*>(impl_)->~RendererImpl();
 }
 
-void Renderer::Render(const entt::registry& registry)
+void Renderer::Render(entt::registry& registry)
 {
     reinterpret_cast<RendererImpl*>(impl_)->Render(registry);
 }
