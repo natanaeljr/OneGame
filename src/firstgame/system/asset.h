@@ -17,9 +17,9 @@ class Asset final {
     explicit Asset(std::unique_ptr<platform::File>&& file, std::filesystem::path path)
         : path_(std::move(path)), file_(std::move(file))
     {
-        TRACE("Asset file opened (\"{}\")", path_.c_str());
+        TRACE("Asset file opened ({})", path_.c_str());
     }
-    ~Asset() { TRACE("Asset file closed (\"{}\")", path_.c_str()); }
+    ~Asset() { TRACE("Asset file closed ({})", path_.c_str()); }
 
     // Copy/Move
     Asset(Asset&&) = default;
@@ -34,4 +34,4 @@ class Asset final {
 
 }  // namespace firstgame::system
 
-#endif  // FIRSTGAMELINUX_ASSET_H_
+#endif  // FIRSTGAME_SYSTEM_ASSET_H_

@@ -5,7 +5,7 @@ namespace firstgame::render {
 
 /// ShaderVertexAttrib is meant to provide a way to generalize the shaders inputs, so that the code
 /// can perform the same tasks on any shader that follows this shader variable patters, discarding
-/// the need for hard-coded Shader information for each shader program written.
+/// the need for hard-coded Shader information for each shader id written.
 struct ShaderVertexAttrib {
     /// List of all supported vertex attributes for using in Shaders
     enum class Enum : unsigned {
@@ -63,7 +63,7 @@ struct ShaderVertexAttrib {
 
 /// ShaderUniform is meant to provide a way to generalize the shaders inputs, so that the code can
 /// perform the same tasks on any shader that follows this shader variable patters, discarding the
-/// need for hard-coded Shader information for each shader program written.
+/// need for hard-coded Shader information for each shader id written.
 struct ShaderUniform {
     /// List of all supported uniform variables for using in Shaders
     enum class Enum : unsigned {

@@ -15,7 +15,7 @@ auto AssetManager::Open(std::filesystem::path assetpath) -> util::Scoped<Asset>
     std::filesystem::path fullpath = basepath / assetpath;
     std::unique_ptr<platform::File> file = filesystem_->Open(fullpath.c_str());
     if (not file) {
-        ERROR("Failed to open asset file (\"{}\")", assetpath.c_str());
+        ERROR("Failed to open asset file ({})", assetpath.c_str());
         return {};
     }
     return util::make_scoped<Asset>(std::move(file), std::move(assetpath));

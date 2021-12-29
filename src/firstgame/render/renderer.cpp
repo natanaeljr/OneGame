@@ -24,39 +24,43 @@
 
 namespace firstgame::render {
 
+using opengl::Shader;
+using util::Scoped;
+using util::Size;
+
 /**************************************************************************************************/
 
 //! Renderer Implementation
 class RendererImpl final {
    public:
-    explicit RendererImpl(util::Size size);
+    explicit RendererImpl(Size size);
     ~RendererImpl();
     void Render(const entt::registry& registry);
-    void OnResize(util::Size size);
+    void OnResize(Size size);
     void OnZoom(float offset);
     void OnCursorMove(float xpos, float ypos);
     void OnKeystroke(event::KeyEvent key_event, float deltatime);
 
    private:
     CameraSystem camera_;
-    util::Scoped<opengl::Shader> shader_main_{};
-    util::Scoped<opengl::Shader> shader_instance_{};
+    Scoped<Shader> shader_main_{};
+    Scoped<Shader> shader_instance_{};
 };
 
 /**************************************************************************************************/
 
-RendererImpl::RendererImpl(util::Size size) : camera_(size)
+RendererImpl::RendererImpl(Size size) : camera_(size)
 {
-    // shaders
     using util::filesystem_literals::operator""_path;
     auto& asset_mgr = system::AssetManager::current();
+
     auto main_vert = asset_mgr.Open("shaders"_path / "main.vert").Assert()->ReadToString();
     auto main_frag = asset_mgr.Open("shaders"_path / "main.frag").Assert()->ReadToString();
     auto instance_vert = asset_mgr.Open("shaders"_path / "instance.vert").Assert()->ReadToString();
-    shader_main_ = opengl::Shader::Build(main_vert.data(), main_frag.data()).Assert();
-    shader_instance_ = opengl::Shader::Build(instance_vert.data(), main_frag.data()).Assert();
 
-    // setup
+    shader_main_ = Shader::Build("main", { main_vert, main_frag }).Assert();
+    shader_instance_ = Shader::Build("instance", { instance_vert, main_frag }).Assert();
+
     OnResize(size);
 
     TRACE("Created RendererImpl");
@@ -66,7 +70,7 @@ RendererImpl::RendererImpl(util::Size size) : camera_(size)
 
 RendererImpl::~RendererImpl()
 {
-    TRACE("Destroyed RendererImpl");
+    TRACE("Destroying RendererImpl");
 }
 
 /**************************************************************************************************/
@@ -80,8 +84,8 @@ void RendererImpl::Render(const entt::registry& registry)
     glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     {
-        // program
-        glUseProgram(shader_main_->program);
+        // id
+        shader_main_->Bind();
         // uniforms
         camera_.Render(RenderPass::_3D);
         // objects
@@ -97,16 +101,16 @@ void RendererImpl::Render(const entt::registry& registry)
         });
     }
     {
-        // program
-        glUseProgram(shader_instance_->program);
+        // id
+        shader_instance_->Bind();
         // uniforms
         camera_.Render(RenderPass::_3D);
         // objects
         auto view = registry.view<const RenderableInstanced>();
         view.each([](const RenderableInstanced& renderable) {
             glBindVertexArray(renderable.vao);
-            glDrawElementsInstanced(GL_TRIANGLES, renderable.num_indices, GL_UNSIGNED_SHORT,
-                                    nullptr, renderable.num_instances);
+            glDrawElementsInstanced(GL_TRIANGLES, renderable.num_indices, GL_UNSIGNED_SHORT, nullptr,
+                                    renderable.num_instances);
         });
     }
     // undo
@@ -115,7 +119,7 @@ void RendererImpl::Render(const entt::registry& registry)
 
 /**************************************************************************************************/
 
-void RendererImpl::OnResize(util::Size size)
+void RendererImpl::OnResize(Size size)
 
 {
     glViewport(0, 0, size.width, size.height);
@@ -140,20 +144,25 @@ void RendererImpl::OnCursorMove(float xpos, float ypos)
 
 void RendererImpl::OnKeystroke(event::KeyEvent key_event, float deltatime)
 {
-    const auto move_direction = [&]() -> std::optional<util::MoveDirection> {
-        if (key_event.action == input::KeyAction::Release) {
+    using input::Key;
+    using input::KeyAction;
+    using util::MoveDirection;
+
+    const auto move_direction = [&]() -> std::optional<MoveDirection> {
+        if (key_event.action == KeyAction::Release) {
             return std::nullopt;
         }
         switch (key_event.key) {
-            case input::Key::W: return util::MoveDirection::Forward;
-            case input::Key::S: return util::MoveDirection::Backward;
-            case input::Key::A: return util::MoveDirection::Left;
-            case input::Key::D: return util::MoveDirection::Right;
-            case input::Key::SPACE: return util::MoveDirection::Up;
-            case input::Key::TAB: return util::MoveDirection::Down;
+            case Key::W: return MoveDirection::Forward;
+            case Key::S: return MoveDirection::Backward;
+            case Key::A: return MoveDirection::Left;
+            case Key::D: return MoveDirection::Right;
+            case Key::SPACE: return MoveDirection::Up;
+            case Key::TAB: return MoveDirection::Down;
             default: return std::nullopt;
         }
     }();
+
     if (move_direction) {
         camera_.OnMove(*move_direction, deltatime);
     }
@@ -162,7 +171,7 @@ void RendererImpl::OnKeystroke(event::KeyEvent key_event, float deltatime)
 /**************************************************************************************************/
 /**************************************************************************************************/
 
-Renderer::Renderer(util::Size size)
+Renderer::Renderer(Size size)
 {
     // guarantee same memory alignment of the interface and implementation
     static_assert(alignof(Renderer) == alignof(RendererImpl));
@@ -182,7 +191,7 @@ void Renderer::Render(const entt::registry& registry)
     reinterpret_cast<RendererImpl*>(impl_)->Render(registry);
 }
 
-void Renderer::OnResize(util::Size size)
+void Renderer::OnResize(Size size)
 {
     reinterpret_cast<RendererImpl*>(impl_)->OnResize(size);
 }

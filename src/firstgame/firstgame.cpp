@@ -22,6 +22,15 @@ namespace firstgame {
 
 /**************************************************************************************************/
 
+using render::Motion;
+using render::Renderable;
+using render::RenderableInstanced;
+using render::Transform;
+using util::Height;
+using util::Width;
+
+/**************************************************************************************************/
+
 //! Class that implements the FirstGame interface
 class FirstGameImpl final : public FirstGame {
    public:
@@ -42,8 +51,7 @@ class FirstGameImpl final : public FirstGame {
 
 FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logger> logger,
                              std::shared_ptr<platform::FileSystem> filesystem)
-    : system_(std::move(logger), std::move(filesystem)),
-      renderer_({ util::Width(width), util::Height(height) })
+    : system_(std::move(logger), std::move(filesystem)), renderer_({ Width(width), Height(height) })
 {
     TRACE("Created FirstGameImpl");
 
@@ -73,30 +81,30 @@ FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logg
 
     // Generate instanced cubes
     entt::handle cubes{ registry_, registry_.create() };
-    cubes.emplace<render::RenderableInstanced>(render::GenerateCubeInstanced(50, 100));
+    cubes.emplace<RenderableInstanced>(render::GenerateCubeInstanced(50, 100));
 
     // Generate Single Quad
     entt::handle quad{ registry_, registry_.create() };
-    quad.emplace<render::Renderable>(render::GenerateQuad());
-    quad.emplace<render::Transform>(render::Transform{
+    quad.emplace<Renderable>(render::GenerateQuad());
+    quad.emplace<Transform>(Transform{
         .position = glm::vec3(-7.0f, 0.0f, 10.0f),
         .scale = glm::vec3(1.0f),
         .rotation = glm::quat(1.0f, glm::vec3(0.0f)),
     });
-    quad.emplace<render::Motion>(render::Motion{
+    quad.emplace<Motion>(Motion{
         .velocity = glm::vec3(0.0f, 0.0f, 40.0f),
         .acceleration = glm::vec3(0.0f, 0.0f, 15.0f),
     });
 
     // Generate Cube
     entt::handle cube{ registry_, registry_.create() };
-    cube.emplace<render::Renderable>(render::GenerateCube());
-    cube.emplace<render::Transform>(render::Transform{
+    cube.emplace<Renderable>(render::GenerateCube());
+    cube.emplace<Transform>(Transform{
         .position = glm::vec3(-7.0f, 0.0f, 0.0f),
         .scale = glm::vec3(1.0f),
         .rotation = glm::angleAxis(glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f)),
     });
-    cube.emplace<render::Motion>(render::Motion{
+    cube.emplace<Motion>(Motion{
         .velocity = glm::vec3(70.0f, 50.0f, 90.0f),
         .acceleration = glm::vec3(0.0f),
     });
@@ -106,8 +114,8 @@ FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logg
 
 void FirstGameImpl::Update(float deltatime)
 {
-    auto view = registry_.view<render::Transform, render::Motion>();
-    view.each([deltatime](render::Transform& transform, render::Motion& motion) {
+    auto view = registry_.view<Transform, Motion>();
+    view.each([deltatime](Transform& transform, Motion& motion) {
         motion.velocity += motion.acceleration * deltatime;
         glm::vec3 degrees = motion.velocity * deltatime;
         transform.rotation *= glm::angleAxis(glm::radians(degrees.x), glm::vec3(1.0f, 0.0f, 0.0f));
@@ -176,7 +184,7 @@ void FirstGameImpl::OnEvent(const event::Event& event)
 
 FirstGameImpl::~FirstGameImpl()
 {
-    TRACE("Destroyed FirstGameImpl");
+    TRACE("Destroying FirstGameImpl");
 }
 
 /**************************************************************************************************/

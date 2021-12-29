@@ -89,6 +89,7 @@ target_sources(FirstGame PRIVATE
     src/firstgame/render/painter.cpp
     src/firstgame/render/camera_system.cpp
     src/firstgame/system/asset_mgr.cpp
+    src/firstgame/opengl/shader.cpp
 )
 target_link_libraries(FirstGame PUBLIC
     Microsoft.GSL::GSL

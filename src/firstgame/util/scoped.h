@@ -5,6 +5,8 @@
 #ifndef FIRSTGAME_UTIL_SCOPED_H_
 #define FIRSTGAME_UTIL_SCOPED_H_
 
+#include <cstring>
+
 namespace firstgame::util {
 
 template<typename T, typename Final = void>
@@ -19,10 +21,7 @@ class Scoped<T> final {
     [[nodiscard]] const T& get() const noexcept { return reinterpret_cast<T*>(object); }
     [[nodiscard]] T* operator->() noexcept { return reinterpret_cast<T*>(object); }
     [[nodiscard]] const T* operator->() const noexcept { return reinterpret_cast<T*>(object); }
-    [[nodiscard]] typename std::add_lvalue_reference<T>::type operator*()
-    {
-        return *reinterpret_cast<T*>(object);
-    }
+    [[nodiscard]] typename std::add_lvalue_reference<T>::type operator*() { return *reinterpret_cast<T*>(object); }
     [[nodiscard]] typename std::add_lvalue_reference<T>::type operator*() const
     {
         return *reinterpret_cast<T*>(object);
@@ -64,7 +63,7 @@ class Scoped<T> final {
     Scoped(Scoped<T>&& other) noexcept : init(std::exchange(other.init, false))
     {
         if (init) {
-            std::memcpy(this->object, other.object, sizeof(T));
+            std::memcpy((void*) this->object, (void*) other.object, sizeof(T));
         }
     }
     Scoped& operator=(Scoped<T>&& other) noexcept
@@ -74,7 +73,7 @@ class Scoped<T> final {
         }
         this->init = other.init;
         if (other.init) {
-            std::memcpy(this->object, other.object, sizeof(T));
+            std::memcpy((void*) this->object, (void*) other.object, sizeof(T));
             other.init = false;
         }
         return *this;
@@ -124,10 +123,7 @@ class Scoped final {
     [[nodiscard]] const T& get() const noexcept { return *reinterpret_cast<T*>(object); }
     [[nodiscard]] T* operator->() noexcept { return reinterpret_cast<T*>(object); }
     [[nodiscard]] const T* operator->() const noexcept { return reinterpret_cast<T*>(object); }
-    [[nodiscard]] typename std::add_lvalue_reference<T>::type operator*()
-    {
-        return *reinterpret_cast<T*>(object);
-    }
+    [[nodiscard]] typename std::add_lvalue_reference<T>::type operator*() { return *reinterpret_cast<T*>(object); }
     [[nodiscard]] typename std::add_lvalue_reference<T>::type operator*() const
     {
         return *reinterpret_cast<T*>(object);
@@ -167,11 +163,10 @@ class Scoped final {
         return std::move(*this);
     }
 
-    Scoped(Scoped&& other) noexcept
-        : init(std::exchange(other.init, false)), final_(std::move(other.final_))
+    Scoped(Scoped&& other) noexcept : init(std::exchange(other.init, false)), final_(std::move(other.final_))
     {
         if (init) {
-            std::memcpy(this->object, other.object, sizeof(T));
+            std::memcpy((void*) this->object, (void*) other.object, sizeof(T));
         }
     }
     Scoped& operator=(Scoped&& other) noexcept
@@ -183,7 +178,7 @@ class Scoped final {
         this->init = other.init;
         if (other.init) {
             this->final_ = std::move(other.final_);
-            std::memcpy(this->object, other.object, sizeof(T));
+            std::memcpy((void*) this->object, (void*) other.object, sizeof(T));
             other.init = false;
         }
         return *this;
@@ -227,8 +222,7 @@ class Scoped final {
 template<typename T, typename Final, typename... Args>
 Scoped<T, std::decay_t<Final>> make_scoped_final(Final&& final, Args&&... args)
 {
-    return Scoped<T, std::decay_t<Final>>::Make(std::forward<Final>(final),
-                                                std::forward<Args>(args)...);
+    return Scoped<T, std::decay_t<Final>>::Make(std::forward<Final>(final), std::forward<Args>(args)...);
 }
 
 }  // namespace firstgame::util
