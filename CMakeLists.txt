@@ -63,7 +63,7 @@ find_package(spdlog 1.8.1 EXACT REQUIRED)
 # GSL for types and functions of C++ Core Guidelines
 find_package(Microsoft.GSL 3.1.0 EXACT REQUIRED)
 # ImGui for graphical user interface
-find_package(imgui 1.79 EXACT REQUIRED)
+find_package(imgui 1.85 EXACT REQUIRED)
 # GLM for opengl mathematics library
 find_package(glm 0.9.9.9 EXACT REQUIRED)
 # STB for image loading/decoding
@@ -85,7 +85,6 @@ find_library(Zlib_LIBRARY NAMES zlibstatic zlibstaticd)
 add_library(FirstGame STATIC)
 target_sources(FirstGame PRIVATE
     src/firstgame/firstgame.cpp
-    src/firstgame/camera/camera.cpp
     src/firstgame/render/renderer.cpp
     src/firstgame/render/painter.cpp
     src/firstgame/render/camera_system.cpp

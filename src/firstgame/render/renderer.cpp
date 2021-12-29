@@ -1,6 +1,7 @@
 #include "renderer.h"
 
 #include <new>
+#include <optional>
 #include <glm/mat4x4.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
