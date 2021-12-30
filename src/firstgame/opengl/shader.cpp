@@ -11,14 +11,14 @@ namespace firstgame::opengl {
 
 // TODO:
 //  - trace to specific shader category
-//  - fix Shader::name string optimization moved.
-//    Probably going to have to make Shader movable, and fix Scoped move logic
+//  - fix GLShader::name_ string optimization moved.
+//    Probably going to have to make GLShader movable, and fix Scoped move logic
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Forward-declarations
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/// RAII for a shader id object created with glCreateShader
+/// RAII for a shader id_ object created with glCreateShader
 using ScopedShaderObj = util::Scoped<GLuint, std::decay_t<decltype(glDeleteShader)>>;
 
 /// Compile shader source into an object
@@ -35,33 +35,77 @@ struct ShaderObjArray {
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// Shader
+// GLShader
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-Shader::Shader(std::string name) : id(glCreateProgram()), name(std::move(name))
+GLShader::GLShader(std::string name) : name_(std::move(name)), id_(glCreateProgram())
 {
-    TRACE("New Shader program '{}' [{}]", this->name, id);
+    TRACE("New GLShader program '{}' [{}]", name_, id_);
 }
 
-Shader::~Shader()
+GLShader::~GLShader()
 {
-    glDeleteProgram(id);
-    TRACE("Delete Shader program '{}' [{}]", name, id);
+    glDeleteProgram(id_);
+    TRACE("Delete GLShader program '{}' [{}]", name_, id_);
 }
 
-void Shader::Bind()
+void GLShader::bind()
 {
-    // TRACE("Binding Shader program '{}' [{}]", name, id);
-    glUseProgram(id);
+    // TRACE("Binding GLShader program '{}' [{}]", name_, id_);
+    glUseProgram(id_);
 }
 
-void Shader::Unbind()
+void GLShader::unbind()
 {
-    // TRACE("Unbinding Shader program '{}' [{}]", name, id);
+    // TRACE("Unbinding GLShader program '{}' [{}]", name_, id_);
     glUseProgram(0);
 }
 
-auto Shader::Build(std::string name, const ShaderSourceArray& sources) -> util::Scoped<Shader>
+GLint GLShader::attr_loc(GLAttr attr) const
+{
+    return attrs[static_cast<size_t>(attr)];
+}
+
+GLint GLShader::unif_loc(GLUnif unif) const
+{
+    return unifs[static_cast<size_t>(unif)];
+}
+
+void GLShader::load_attr_loc(const std::initializer_list<GLAttrInfo>& list)
+{
+    this->bind();
+    for (const auto& item : list) {
+        if (const GLint* loc = std::get_if<GLint>(&item.loc_name))
+            attrs[static_cast<size_t>(item.attr)] = *loc;
+        else {
+            auto attr_name = std::get<std::string_view>(item.loc_name);
+            const GLint new_loc = glGetAttribLocation(id_, attr_name.data());
+            if (new_loc == -1) {
+                ERROR("Failed to get location for attr '{}' from GLShader '{}' [{}]", attr_name, name_, id_);
+            }
+            attrs[static_cast<size_t>(item.attr)] = new_loc;
+        }
+    }
+}
+
+void GLShader::load_unif_loc(const std::initializer_list<GLUnifInfo>& list)
+{
+    this->bind();
+    for (const auto& item : list) {
+        if (const GLint* loc = std::get_if<GLint>(&item.loc_name))
+            unifs[static_cast<size_t>(item.unif)] = *loc;
+        else {
+            auto unif_name = std::get<std::string_view>(item.loc_name);
+            const GLint new_loc = glGetUniformLocation(id_, unif_name.data());
+            if (new_loc == -1) {
+                ERROR("Failed to get location for uniform '{}' from GLShader '{}' [{}]", unif_name, name_, id_);
+            }
+            unifs[static_cast<size_t>(item.unif)] = new_loc;
+        }
+    }
+}
+
+auto GLShader::build(std::string name, const struct ShaderSourceArray& sources) -> util::Scoped<GLShader>
 {
     auto vertex = CompileShader(GL_VERTEX_SHADER, sources.vertex.data());
     auto fragment = CompileShader(GL_FRAGMENT_SHADER, sources.fragment.data());
@@ -72,13 +116,13 @@ auto Shader::Build(std::string name, const ShaderSourceArray& sources) -> util::
         return {};
     }
 
-    auto shader = util::make_scoped<Shader>(std::move(name));
-    if (not LinkShader(shader->id, { *vertex, *fragment, (geometry ? std::optional(*geometry) : std::nullopt) })) {
-        ERROR("Failed to Link Shader program");
+    auto shader = util::make_scoped<GLShader>(std::move(name));
+    if (not LinkShader(shader->id_, { *vertex, *fragment, (geometry ? std::optional(*geometry) : std::nullopt) })) {
+        ERROR("Failed to Link GLShader program");
         return {};
     }
 
-    DEBUG("Compiled & Linked Shader program '{}' [{}]", shader->name, shader->id);
+    DEBUG("Compiled & Linked GLShader program '{}' [{}]", shader->name_, shader->id_);
     return shader;
 }
 
@@ -93,13 +137,13 @@ auto CompileShader(GLenum shader_type, const char* shader_src) -> ScopedShaderOb
     if (info_len) {
         auto info = std::make_unique<char[]>(info_len);
         glGetShaderInfoLog(*shader, info_len, nullptr, info.get());
-        DEBUG("{} Compilation Output:\n{}", ShaderTypeStr(shader_type), info.get());
+        DEBUG("{} Compilation Output:\n{}", shader_type_str(shader_type), info.get());
     }
 
     GLint compiled = 0;
     glGetShaderiv(*shader, GL_COMPILE_STATUS, &compiled);
     if (!compiled) {
-        ERROR("Failed to Compile {}", ShaderTypeStr(shader_type));
+        ERROR("Failed to Compile {}", shader_type_str(shader_type));
         return {};
     }
 
@@ -119,13 +163,13 @@ bool LinkShader(GLuint program, const struct ShaderObjArray& shaders)
     if (info_len) {
         auto info = std::make_unique<char[]>(info_len);
         glGetProgramInfoLog(program, info_len, nullptr, info.get());
-        DEBUG("Shader Program Link Output:\n{}", info.get());
+        DEBUG("GLShader Program Link Output:\n{}", info.get());
     }
 
     GLint link_status = 0;
     glGetProgramiv(program, GL_LINK_STATUS, &link_status);
     if (!link_status) {
-        ERROR("Failed to Link Shader Program");
+        ERROR("Failed to Link GLShader Program");
     }
 
     glDetachShader(program, shaders.vertex);
@@ -136,7 +180,7 @@ bool LinkShader(GLuint program, const struct ShaderObjArray& shaders)
     return link_status;
 }
 
-auto ShaderTypeStr(GLenum shader_type) -> std::string_view
+auto shader_type_str(GLenum shader_type) -> std::string_view
 {
     switch (shader_type) {
         case GL_VERTEX_SHADER: return "GL_VERTEX_SHADER";

@@ -3,52 +3,82 @@
 
 #include <string>
 #include <optional>
+#include <variant>
 #include "firstgame/util/scoped.h"
 #include "firstgame/opengl/gl/enum.h"
 #include "firstgame/opengl/gl/types.h"
+#include "firstgame/opengl/shader_vars.h"
 
 namespace firstgame::opengl {
 
-/// Shader represents an OpenGL shader program with utility functions
-/// to build the shader, bind/unbind and trace requests/execution.
-/// Example:
-/// ```
-///  auto main_shader = Shader::Build("main", {vertex, fragment}).Assert();
-///  main_shader->Bind();
-/// ```
-/// The return type from Build is Scoped because if build fails the returned object
-/// is empty and that can be checked with exists() or asserted with .Assert().
-/// Neither move or copy is allowed, so as to simplify shader ID ownership.
-/// Nonetheless, Scoped allows for the Shader object to be moved safely.
-class Shader final {
-   public:
-    explicit Shader(std::string name);
-    ~Shader();
-    Shader(const Shader&) = delete;
-    Shader& operator=(const Shader&) = delete;
-
-   public:
-    /// Get shader program name
-    [[nodiscard]] std::string_view Name() const { return name; }
-
-    /// Bind shader program
-    void Bind();
-
-    /// Unbind shader program
-    void Unbind();
-
-   public:
-    /// Build the shader program from sources
-    static auto Build(std::string name, const struct ShaderSourceArray& sources) -> util::Scoped<Shader>;
-
-   private:
-    /// Program ID
-    unsigned int id;
-    /// Program Name
-    std::string name;
+/// Input Attribute Info for GLShader::load_attr_loc().
+struct GLAttrInfo {
+    GLAttr attr;
+    std::variant<GLint, std::string_view> loc_name;
 };
 
-/// Input shader sources array for Shader::Build.
+/// Input Uniform Info for GLShader::load_unif_loc().
+struct GLUnifInfo {
+    GLUnif unif;
+    std::variant<GLint, std::string_view> loc_name;
+};
+
+/// GLShader represents an OpenGL shader program with utility functions
+/// to build the shader, bind/unbind, get uniform and attribute location and trace requests/execution.
+/// Example:
+/// ```
+///  auto main_shader = GLShader::build("main", {vertex, fragment}).Assert();
+///  main_shader->bind();
+/// ```
+/// The return type from build is Scoped because if build fails the returned object
+/// is empty and that can be checked with exists() or asserted with .Assert().
+/// Neither move or copy is allowed, so as to simplify shader ID ownership.
+/// Nonetheless, Scoped allows for the GLShader object to be moved safely.
+class GLShader final {
+   public:
+    explicit GLShader(std::string name);
+    ~GLShader();
+    GLShader(const GLShader&) = delete;
+    GLShader& operator=(const GLShader&) = delete;
+
+   public:
+    /// Get shader program name_
+    [[nodiscard]] std::string_view name() const { return name_; }
+
+    /// Bind shader program
+    void bind();
+
+    /// Unbind shader program
+    void unbind();
+
+    /// Get attribute location
+    [[nodiscard]] GLint attr_loc(GLAttr attr) const;
+
+    /// Get uniform location
+    [[nodiscard]] GLint unif_loc(GLUnif unif) const;
+
+    /// Load attributes' location into local array
+    void load_attr_loc(const std::initializer_list<GLAttrInfo>& list);
+
+    /// Load unifs' location into local array
+    void load_unif_loc(const std::initializer_list<GLUnifInfo>& list);
+
+   public:
+    /// build the shader program from sources
+    static auto build(std::string name, const struct ShaderSourceArray& sources) -> util::Scoped<GLShader>;
+
+   private:
+    /// Program name
+    std::string name_;
+    /// Program ID
+    unsigned int id_;
+    /// Attributes' information
+    GLint attrs[static_cast<size_t>(GLAttr::COUNT)] = { -1 };
+    /// Uniforms' information
+    GLint unifs[static_cast<size_t>(GLUnif::COUNT)] = { -1 };
+};
+
+/// Input shader sources array for GLShader::build.
 struct ShaderSourceArray {
     std::string_view vertex;    // required
     std::string_view fragment;  // required
@@ -56,7 +86,7 @@ struct ShaderSourceArray {
 };
 
 /// Stringify opengl shader type.
-auto ShaderTypeStr(GLenum shader_type) -> std::string_view;
+auto shader_type_str(GLenum shader_type) -> std::string_view;
 
 }  // namespace firstgame::opengl
 #endif  // FIRSTGAME_OPENGL_SHADER_H_

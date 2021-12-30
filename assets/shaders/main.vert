@@ -1,19 +1,16 @@
 #version 330 core
-#extension GL_ARB_explicit_attrib_location : require
-#extension GL_ARB_explicit_uniform_location : require
-#extension GL_ARB_separate_shader_objects : require
 
-layout(location = 0) in vec3 inPosition;
-layout(location = 2) in vec4 inColor;
+in vec3 aPosition;
+in vec4 aColor;
 
-layout(location = 2) out vec4 outColor;
+out vec4 oColor;
 
-layout(location = 1) uniform mat4 uModel;
-layout(location = 2) uniform mat4 uView;
-layout(location = 3) uniform mat4 uProjection;
+uniform mat4 uModel;
+uniform mat4 uView;
+uniform mat4 uProjection;
 
 void main()
 {
-    gl_Position = uProjection * uView * uModel * vec4(inPosition, 1.0);
-    outColor = inColor;
+    gl_Position = uProjection * uView * uModel * vec4(aPosition, 1.0);
+    oColor = aColor;
 }

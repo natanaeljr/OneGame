@@ -9,8 +9,6 @@
 #include "firstgame/opengl/gl.h"
 #include "firstgame/system/log.h"
 
-#include "shader_variables.h"
-
 namespace firstgame::render {
 
 struct Vertex {
@@ -22,8 +20,7 @@ struct Instance {
     glm::mat4 model;
 };
 
-Renderable GenerateRenderable(gsl::span<const Vertex> vertices,
-                              gsl::span<const unsigned short> indices);
+Renderable GenerateRenderable(gsl::span<const Vertex> vertices, gsl::span<const unsigned short> indices);
 
 RenderableInstanced GenerateRenderableInstanced(gsl::span<const Vertex> vertices,
                                                 gsl::span<const unsigned short> indices,
@@ -121,8 +118,7 @@ RenderableInstanced GenerateCubeInstanced(unsigned int rows, unsigned int cols)
             instances[index] = {
                 .model =
                     [i, j] {
-                        glm::mat4 translation =
-                            glm::translate(glm::mat4(1.0f), glm::vec3(float(i), -3.0f, float(j)));
+                        glm::mat4 translation = glm::translate(glm::mat4(1.0f), glm::vec3(float(i), -3.0f, float(j)));
                         glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(0.5f));
                         return translation * scale;
                     }(),
@@ -134,8 +130,7 @@ RenderableInstanced GenerateCubeInstanced(unsigned int rows, unsigned int cols)
 
 /**************************************************************************************************/
 
-Renderable GenerateRenderable(gsl::span<const Vertex> vertices,
-                              gsl::span<const unsigned short> indices)
+Renderable GenerateRenderable(gsl::span<const Vertex> vertices, gsl::span<const unsigned short> indices)
 {
     ASSERT(indices.size() <= std::numeric_limits<unsigned short>::max());
 
@@ -143,11 +138,11 @@ Renderable GenerateRenderable(gsl::span<const Vertex> vertices,
     glBindVertexArray(renderable.vao);
     glBindBuffer(GL_ARRAY_BUFFER, renderable.vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size_bytes(), vertices.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(ShaderVertexAttrib::Position.location(), 3, GL_FLOAT, GL_FALSE,
-                          sizeof(Vertex), (void*) offsetof(Vertex, position));
+    glVertexAttribPointer(ShaderVertexAttrib::Position.location(), 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                          (void*) offsetof(Vertex, position));
     glEnableVertexAttribArray(ShaderVertexAttrib::Position.location());
-    glVertexAttribPointer(ShaderVertexAttrib::Color.location(), 4, GL_FLOAT, GL_FALSE,
-                          sizeof(Vertex), (void*) offsetof(Vertex, color));
+    glVertexAttribPointer(ShaderVertexAttrib::Color.location(), 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                          (void*) offsetof(Vertex, color));
     glEnableVertexAttribArray(ShaderVertexAttrib::Color.location());
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderable.ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size_bytes(), indices.data(), GL_STATIC_DRAW);
@@ -172,11 +167,11 @@ RenderableInstanced GenerateRenderableInstanced(gsl::span<const Vertex> vertices
     glBufferData(GL_ARRAY_BUFFER, vertices.size_bytes(), vertices.data(), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(ShaderVertexAttrib::Position.location());
-    glVertexAttribPointer(ShaderVertexAttrib::Position.location(), 3, GL_FLOAT, GL_FALSE,
-                          sizeof(Vertex), (void*) offsetof(Vertex, position));
+    glVertexAttribPointer(ShaderVertexAttrib::Position.location(), 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                          (void*) offsetof(Vertex, position));
     glEnableVertexAttribArray(ShaderVertexAttrib::Color.location());
-    glVertexAttribPointer(ShaderVertexAttrib::Color.location(), 4, GL_FLOAT, GL_FALSE,
-                          sizeof(Vertex), (void*) offsetof(Vertex, color));
+    glVertexAttribPointer(ShaderVertexAttrib::Color.location(), 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+                          (void*) offsetof(Vertex, color));
 
     glBindBuffer(GL_ARRAY_BUFFER, renderable.ibo);
     glBufferData(GL_ARRAY_BUFFER, instances.size_bytes(), instances.data(), GL_STATIC_DRAW);

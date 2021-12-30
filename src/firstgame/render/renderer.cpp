@@ -19,12 +19,13 @@
 #include "renderable.h"
 #include "renderable_instanced.h"
 #include "transform.h"
-#include "shader_variables.h"
 #include "camera_system.h"
 
 namespace firstgame::render {
 
-using opengl::Shader;
+using opengl::GLAttr;
+using opengl::GLShader;
+using opengl::GLUnif;
 using util::Scoped;
 using util::Size;
 
@@ -43,8 +44,8 @@ class RendererImpl final {
 
    private:
     CameraSystem camera_;
-    Scoped<Shader> shader_main_{};
-    Scoped<Shader> shader_instance_{};
+    Scoped<GLShader> shader_main_{};
+    Scoped<GLShader> shader_instance_{};
 };
 
 /**************************************************************************************************/
@@ -58,8 +59,28 @@ RendererImpl::RendererImpl(Size size) : camera_(size)
     auto main_frag = asset_mgr.Open("shaders"_path / "main.frag").Assert()->ReadToString();
     auto instance_vert = asset_mgr.Open("shaders"_path / "instance.vert").Assert()->ReadToString();
 
-    shader_main_ = Shader::Build("main", { main_vert, main_frag }).Assert();
-    shader_instance_ = Shader::Build("instance", { instance_vert, main_frag }).Assert();
+    shader_main_ = GLShader::build("main", { main_vert, main_frag }).Assert();
+    shader_instance_ = GLShader::build("instance", { instance_vert, main_frag }).Assert();
+
+    shader_main_->load_attr_loc({
+        { opengl::GLAttr::POSITION, "aPosition" },
+        { opengl::GLAttr::COLOR, "aColor" },
+    });
+    shader_main_->load_unif_loc({
+        { opengl::GLUnif::MODEL, "uModel" },
+        { opengl::GLUnif::VIEW, "uView" },
+        { opengl::GLUnif::PROJECTION, "uProjection" },
+    });
+
+    shader_instance_->load_attr_loc({
+        { opengl::GLAttr::POSITION, "aPosition" },
+        { opengl::GLAttr::COLOR, "aColor" },
+        { opengl::GLAttr::MODEL, "aModel" },
+    });
+    shader_instance_->load_unif_loc({
+        { opengl::GLUnif::VIEW, "uView" },
+        { opengl::GLUnif::PROJECTION, "uProjection" },
+    });
 
     OnResize(size);
 
@@ -84,26 +105,26 @@ void RendererImpl::Render(const entt::registry& registry)
     glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     {
-        // id
-        shader_main_->Bind();
-        // uniforms
+        // id_
+        shader_main_->bind();
+        // unifs
         camera_.Render(RenderPass::_3D);
         // objects
         auto view = registry.view<const Transform, const Renderable>();
-        view.each([](const Transform& transform, const Renderable& renderable) {
+        view.each([&](const Transform& transform, const Renderable& renderable) {
             glm::mat4 translation = glm::translate(glm::mat4(1.0f), transform.position);
             glm::mat4 rotation = glm::toMat4(transform.rotation);
             glm::mat4 scale = glm::scale(glm::mat4(1.0f), transform.scale);
             glm::mat4 model = translation * rotation * scale;
-            glUniformMatrix4fv(ShaderUniform::Model.location(), 1, GL_FALSE, glm::value_ptr(model));
+            glUniformMatrix4fv(shader_main_->unif_loc(GLUnif::MODEL), 1, GL_FALSE, glm::value_ptr(model));
             glBindVertexArray(renderable.vao);
             glDrawElements(GL_TRIANGLES, renderable.num_indices, GL_UNSIGNED_SHORT, nullptr);
         });
     }
     {
-        // id
-        shader_instance_->Bind();
-        // uniforms
+        // id_
+        shader_instance_->bind();
+        // unifs
         camera_.Render(RenderPass::_3D);
         // objects
         auto view = registry.view<const RenderableInstanced>();
