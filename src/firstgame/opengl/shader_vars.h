@@ -3,7 +3,7 @@
 
 namespace firstgame::opengl {
 
-/// Enumeration of supported GL GLShader Attributes
+/// Enumeration of supported GL Shader Attributes
 enum class GLAttr {
     POSITION = 0,
     TEXCOORD,
@@ -13,7 +13,7 @@ enum class GLAttr {
     COUNT,
 };
 
-/// Enumeration of supported GL GLShader Uniforms
+/// Enumeration of supported GL Shader Uniforms
 enum class GLUnif {
     COLOR = 0,
     MODEL,

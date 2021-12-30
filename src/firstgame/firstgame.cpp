@@ -16,6 +16,7 @@
 #include "firstgame/render/renderer.h"
 #include "firstgame/render/renderable.h"
 #include "firstgame/render/transform.h"
+#include "firstgame/render/shader_lib.h"
 #include "firstgame/util/overloaded.h"
 
 namespace firstgame {
@@ -79,13 +80,19 @@ FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logg
     //     }
     // }
 
+    using render::MyShader;
+    using render::ShaderLibrary;
+
+    auto& shader_simple = ShaderLibrary::current().get(MyShader::SIMPLE);
+    auto& shader_instance = ShaderLibrary::current().get(MyShader::SIMPLE_INSTANCE);
+
     // Generate instanced cubes
     entt::handle cubes{ registry_, registry_.create() };
-    cubes.emplace<RenderableInstanced>(render::GenerateCubeInstanced(50, 100));
+    cubes.emplace<RenderableInstanced>(render::GenerateCubeInstanced(shader_instance, 50, 100));
 
     // Generate Single Quad
     entt::handle quad{ registry_, registry_.create() };
-    quad.emplace<Renderable>(render::GenerateQuad());
+    quad.emplace<Renderable>(render::GenerateQuad(shader_simple));
     quad.emplace<Transform>(Transform{
         .position = glm::vec3(-7.0f, 0.0f, 10.0f),
         .scale = glm::vec3(1.0f),
@@ -98,7 +105,7 @@ FirstGameImpl::FirstGameImpl(int width, int height, std::shared_ptr<spdlog::logg
 
     // Generate Cube
     entt::handle cube{ registry_, registry_.create() };
-    cube.emplace<Renderable>(render::GenerateCube());
+    cube.emplace<Renderable>(render::GenerateCube(shader_simple));
     cube.emplace<Transform>(Transform{
         .position = glm::vec3(-7.0f, 0.0f, 0.0f),
         .scale = glm::vec3(1.0f),
@@ -131,8 +138,7 @@ void FirstGameImpl::Update(float deltatime)
 void FirstGameImpl::OnImGuiRender()
 {
     ImGui::Begin("Stats");
-    ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate,
-                ImGui::GetIO().Framerate);
+    ImGui::Text("%.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::End();
 }
 
@@ -140,44 +146,37 @@ void FirstGameImpl::OnImGuiRender()
 
 void FirstGameImpl::OnEvent(const event::Event& event)
 {
-    std::visit(
-        util::Overloaded{
-            [this](const event::KeyEvent& key) {
-                TRACE("Event Received: Key {{key: {}, action: {}}}", key.key, key.action);
-                renderer_.OnKeystroke(key, 0.016f);
-            },
-            [this](const event::CursorEvent& cursor) {
-                TRACE("Event Received: Cursor {{xpos: {}, ypos: {}}}", cursor.xpos, cursor.ypos);
-                renderer_.OnCursorMove(cursor.xpos, cursor.ypos);
-            },
-            [](const event::MouseEvent& mouse) {
-                TRACE("Event Received: Mouse {{button: {}, action: {}}}", mouse.button,
-                      mouse.action);
-            },
-            [this](const event::ScrollEvent& scroll) {
-                TRACE("Event Received: Scroll {{xoffset: {}, yoffset: {}}}", scroll.xoffset,
-                      scroll.yoffset);
-                renderer_.OnScroll(scroll.yoffset);
-            },
-            [](const event::JoystickEvent& joystick_event) { TRACE("Event Received: Joystick"); },
-            [this](const event::WindowEvent& window_event) {
-                std::visit(util::Overloaded{
-                               [](const event::WindowEvent::Focus& focus) {
-                                   TRACE("Event Received: Window::Focus");
-                               },
-                               [](const event::WindowEvent::Imize& imize) {
-                                   TRACE("Event Received: Window::Imize");
-                               },
+    std::visit(util::Overloaded{
+                   [this](const event::KeyEvent& key) {
+                       TRACE("Event Received: Key {{key: {}, action: {}}}", key.key, key.action);
+                       renderer_.OnKeystroke(key, 0.016f);
+                   },
+                   [this](const event::CursorEvent& cursor) {
+                       TRACE("Event Received: Cursor {{xpos: {}, ypos: {}}}", cursor.xpos, cursor.ypos);
+                       renderer_.OnCursorMove(cursor.xpos, cursor.ypos);
+                   },
+                   [](const event::MouseEvent& mouse) {
+                       TRACE("Event Received: Mouse {{button: {}, action: {}}}", mouse.button, mouse.action);
+                   },
+                   [this](const event::ScrollEvent& scroll) {
+                       TRACE("Event Received: Scroll {{xoffset: {}, yoffset: {}}}", scroll.xoffset, scroll.yoffset);
+                       renderer_.OnScroll(scroll.yoffset);
+                   },
+                   [](const event::JoystickEvent& joystick_event) { TRACE("Event Received: Joystick"); },
+                   [this](const event::WindowEvent& window_event) {
+                       std::visit(
+                           util::Overloaded{
+                               [](const event::WindowEvent::Focus& focus) { TRACE("Event Received: Window::Focus"); },
+                               [](const event::WindowEvent::Imize& imize) { TRACE("Event Received: Window::Imize"); },
                                [this](const event::WindowEvent::Resize& resize) {
                                    TRACE("Event Received: Window::Resize");
-                                   renderer_.OnResize(
-                                       { util::Width(resize.width), util::Height(resize.height) });
+                                   renderer_.OnResize({ util::Width(resize.width), util::Height(resize.height) });
                                },
                            },
                            window_event.variant);
-            },
-        },
-        event);
+                   },
+               },
+               event);
 }
 
 /**************************************************************************************************/

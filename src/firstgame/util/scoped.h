@@ -6,6 +6,9 @@
 #define FIRSTGAME_UTIL_SCOPED_H_
 
 #include <cstring>
+#include <cstdlib>
+#include <type_traits>
+#include <utility>
 
 namespace firstgame::util {
 
@@ -17,8 +20,8 @@ class Scoped<T> final {
    public:
     Scoped() = default;
 
-    [[nodiscard]] T& get() noexcept { return reinterpret_cast<T*>(object); }
-    [[nodiscard]] const T& get() const noexcept { return reinterpret_cast<T*>(object); }
+    [[nodiscard]] T& get() noexcept { return *reinterpret_cast<T*>(object); }
+    [[nodiscard]] const T& get() const noexcept { return *reinterpret_cast<T*>(object); }
     [[nodiscard]] T* operator->() noexcept { return reinterpret_cast<T*>(object); }
     [[nodiscard]] const T* operator->() const noexcept { return reinterpret_cast<T*>(object); }
     [[nodiscard]] typename std::add_lvalue_reference<T>::type operator*() { return *reinterpret_cast<T*>(object); }
@@ -47,7 +50,7 @@ class Scoped<T> final {
     Scoped& Assert() &
     {
         if (not init) {
-            abort();
+            std::abort();
         }
         return *this;
     }
@@ -55,7 +58,7 @@ class Scoped<T> final {
     Scoped&& Assert() &&
     {
         if (not init) {
-            abort();
+            std::abort();
         }
         return std::move(*this);
     }
@@ -150,7 +153,7 @@ class Scoped final {
     Scoped& Assert() &
     {
         if (not init) {
-            abort();
+            std::abort();
         }
         return *this;
     }
@@ -158,7 +161,7 @@ class Scoped final {
     Scoped&& Assert() &&
     {
         if (not init) {
-            abort();
+            std::abort();
         }
         return std::move(*this);
     }

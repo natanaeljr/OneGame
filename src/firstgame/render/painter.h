@@ -3,14 +3,15 @@
 
 #include "renderable.h"
 #include "renderable_instanced.h"
+#include "firstgame/opengl/shader.h"
 
 namespace firstgame::render {
 
-Renderable GenerateQuad();
+Renderable GenerateQuad(const opengl::GLShader& shader);
 
-Renderable GenerateCube();
+Renderable GenerateCube(const opengl::GLShader& shader);
 
-RenderableInstanced GenerateCubeInstanced(unsigned int rows, unsigned int cols);
+RenderableInstanced GenerateCubeInstanced(const opengl::GLShader& shader, unsigned int rows, unsigned int cols);
 
 }  // namespace firstgame::render
 

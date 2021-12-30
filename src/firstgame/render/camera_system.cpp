@@ -8,12 +8,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "firstgame/opengl/gl/boolean.h"
 #include "firstgame/opengl/gl/functions.h"
-
-#include "shader_variables.h"
+#include "firstgame/opengl/shader.h"
 
 namespace firstgame::render {
 
-void CameraSystem::Render(RenderPass pass) const
+void CameraSystem::Render(RenderPass pass, opengl::GLShader& shader) const
 {
     const ViewProjection& matrix = [this, pass] {
         switch (pass) {
@@ -23,9 +22,8 @@ void CameraSystem::Render(RenderPass pass) const
         abort();  //< unreachable
     }();
 
-    glUniformMatrix4fv(ShaderUniform::View.location(), 1, GL_FALSE, glm::value_ptr(matrix.view));
-    glUniformMatrix4fv(ShaderUniform::Projection.location(), 1, GL_FALSE,
-                       glm::value_ptr(matrix.projection));
+    glUniformMatrix4fv(shader.unif_loc(opengl::GLUnif::VIEW), 1, GL_FALSE, glm::value_ptr(matrix.view));
+    glUniformMatrix4fv(shader.unif_loc(opengl::GLUnif::PROJECTION), 1, GL_FALSE, glm::value_ptr(matrix.projection));
 }
 
 }  // namespace firstgame::render

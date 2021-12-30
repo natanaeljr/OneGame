@@ -1,6 +1,8 @@
 #ifndef FIRSTGAME_UTIL_CURRENTON_H_
 #define FIRSTGAME_UTIL_CURRENTON_H_
 
+#include <cassert>
+
 namespace firstgame::util {
 
 template<class C>

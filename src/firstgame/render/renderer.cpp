@@ -6,6 +6,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <entt/entity/handle.hpp>
 #include <entt/entity/registry.hpp>
 
 #include "firstgame/opengl/gl.h"
@@ -20,6 +21,7 @@
 #include "renderable_instanced.h"
 #include "transform.h"
 #include "camera_system.h"
+#include "shader_lib.h"
 
 namespace firstgame::render {
 
@@ -44,45 +46,17 @@ class RendererImpl final {
 
    private:
     CameraSystem camera_;
-    Scoped<GLShader> shader_main_{};
-    Scoped<GLShader> shader_instance_{};
+    ShaderLibrary shader_lib_;
 };
 
 /**************************************************************************************************/
 
 RendererImpl::RendererImpl(Size size) : camera_(size)
 {
-    using util::filesystem_literals::operator""_path;
-    auto& asset_mgr = system::AssetManager::current();
-
-    auto main_vert = asset_mgr.Open("shaders"_path / "main.vert").Assert()->ReadToString();
-    auto main_frag = asset_mgr.Open("shaders"_path / "main.frag").Assert()->ReadToString();
-    auto instance_vert = asset_mgr.Open("shaders"_path / "instance.vert").Assert()->ReadToString();
-
-    shader_main_ = GLShader::build("main", { main_vert, main_frag }).Assert();
-    shader_instance_ = GLShader::build("instance", { instance_vert, main_frag }).Assert();
-
-    shader_main_->load_attr_loc({
-        { opengl::GLAttr::POSITION, "aPosition" },
-        { opengl::GLAttr::COLOR, "aColor" },
-    });
-    shader_main_->load_unif_loc({
-        { opengl::GLUnif::MODEL, "uModel" },
-        { opengl::GLUnif::VIEW, "uView" },
-        { opengl::GLUnif::PROJECTION, "uProjection" },
-    });
-
-    shader_instance_->load_attr_loc({
-        { opengl::GLAttr::POSITION, "aPosition" },
-        { opengl::GLAttr::COLOR, "aColor" },
-        { opengl::GLAttr::MODEL, "aModel" },
-    });
-    shader_instance_->load_unif_loc({
-        { opengl::GLUnif::VIEW, "uView" },
-        { opengl::GLUnif::PROJECTION, "uProjection" },
-    });
-
     OnResize(size);
+
+    shader_lib_.load<MyShader::SIMPLE>();
+    shader_lib_.load<MyShader::SIMPLE_INSTANCE>();
 
     TRACE("Created RendererImpl");
 }
@@ -104,11 +78,12 @@ void RendererImpl::Render(const entt::registry& registry)
     // clear buffers
     glClearColor(0.1f, 0.2f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     {
-        // id_
-        shader_main_->bind();
+        auto& shader = shader_lib_.get(MyShader::SIMPLE);
+        shader.bind();
         // unifs
-        camera_.Render(RenderPass::_3D);
+        camera_.Render(RenderPass::_3D, shader);
         // objects
         auto view = registry.view<const Transform, const Renderable>();
         view.each([&](const Transform& transform, const Renderable& renderable) {
@@ -116,22 +91,21 @@ void RendererImpl::Render(const entt::registry& registry)
             glm::mat4 rotation = glm::toMat4(transform.rotation);
             glm::mat4 scale = glm::scale(glm::mat4(1.0f), transform.scale);
             glm::mat4 model = translation * rotation * scale;
-            glUniformMatrix4fv(shader_main_->unif_loc(GLUnif::MODEL), 1, GL_FALSE, glm::value_ptr(model));
+            glUniformMatrix4fv(shader.unif_loc(GLUnif::MODEL), 1, GL_FALSE, glm::value_ptr(model));
             glBindVertexArray(renderable.vao);
             glDrawElements(GL_TRIANGLES, renderable.num_indices, GL_UNSIGNED_SHORT, nullptr);
         });
     }
     {
-        // id_
-        shader_instance_->bind();
+        auto& shader = shader_lib_.get(MyShader::SIMPLE_INSTANCE);
+        shader.bind();
         // unifs
-        camera_.Render(RenderPass::_3D);
+        camera_.Render(RenderPass::_3D, shader);
         // objects
         auto view = registry.view<const RenderableInstanced>();
         view.each([](const RenderableInstanced& renderable) {
             glBindVertexArray(renderable.vao);
-            glDrawElementsInstanced(GL_TRIANGLES, renderable.num_indices, GL_UNSIGNED_SHORT, nullptr,
-                                    renderable.num_instances);
+            glDrawElementsInstanced(GL_TRIANGLES, renderable.num_indices, GL_UNSIGNED_SHORT, nullptr, renderable.num_instances);
         });
     }
     // undo

@@ -11,18 +11,6 @@
 
 namespace firstgame::opengl {
 
-/// Input Attribute Info for GLShader::load_attr_loc().
-struct GLAttrInfo {
-    GLAttr attr;
-    std::variant<GLint, std::string_view> loc_name;
-};
-
-/// Input Uniform Info for GLShader::load_unif_loc().
-struct GLUnifInfo {
-    GLUnif unif;
-    std::variant<GLint, std::string_view> loc_name;
-};
-
 /// GLShader represents an OpenGL shader program with utility functions
 /// to build the shader, bind/unbind, get uniform and attribute location and trace requests/execution.
 /// Example:
@@ -42,7 +30,7 @@ class GLShader final {
     GLShader& operator=(const GLShader&) = delete;
 
    public:
-    /// Get shader program name_
+    /// Get shader program name
     [[nodiscard]] std::string_view name() const { return name_; }
 
     /// Bind shader program
@@ -58,13 +46,13 @@ class GLShader final {
     [[nodiscard]] GLint unif_loc(GLUnif unif) const;
 
     /// Load attributes' location into local array
-    void load_attr_loc(const std::initializer_list<GLAttrInfo>& list);
+    void load_attr_loc(const std::initializer_list<struct GLAttrInfo>& list);
 
-    /// Load unifs' location into local array
-    void load_unif_loc(const std::initializer_list<GLUnifInfo>& list);
+    /// Load uniforms' location into local array
+    void load_unif_loc(const std::initializer_list<struct GLUnifInfo>& list);
 
    public:
-    /// build the shader program from sources
+    /// Build the shader program from sources
     static auto build(std::string name, const struct ShaderSourceArray& sources) -> util::Scoped<GLShader>;
 
    private:
@@ -72,10 +60,22 @@ class GLShader final {
     std::string name_;
     /// Program ID
     unsigned int id_;
-    /// Attributes' information
+    /// Attributes' location
     GLint attrs[static_cast<size_t>(GLAttr::COUNT)] = { -1 };
-    /// Uniforms' information
+    /// Uniforms' location
     GLint unifs[static_cast<size_t>(GLUnif::COUNT)] = { -1 };
+};
+
+/// Input Attribute Info for GLShader::load_attr_loc().
+struct GLAttrInfo {
+    GLAttr attr;                                     ///< One of the attributes supported by the engine
+    std::variant<GLint, std::string_view> loc_name;  ///< Either the hardcoded location or variable name
+};
+
+/// Input Uniform Info for GLShader::load_unif_loc().
+struct GLUnifInfo {
+    GLUnif unif;                                     ///< One of the uniforms supported by the engine
+    std::variant<GLint, std::string_view> loc_name;  ///< Either the hardcoded location or variable name
 };
 
 /// Input shader sources array for GLShader::build.

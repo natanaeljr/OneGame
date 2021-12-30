@@ -11,6 +11,7 @@
 #include "camera_perspective.h"
 #include "camera_orthographic.h"
 #include "render_pass.h"
+#include "firstgame/opengl/shader.h"
 
 namespace firstgame::render {
 
@@ -35,10 +36,7 @@ class CameraSystem {
         orthographic_.Zoom(offset);
     }
 
-    void OnMove(util::MoveDirection direction, float deltatime)
-    {
-        perspective_.Translate(direction, deltatime);
-    }
+    void OnMove(util::MoveDirection direction, float deltatime) { perspective_.Translate(direction, deltatime); }
 
     void OnPoint(float xpos, float ypos)
     {
@@ -53,7 +51,7 @@ class CameraSystem {
         last_ypos = ypos;
     }
 
-    void Render(RenderPass pass) const;
+    void Render(RenderPass pass, opengl::GLShader& shader) const;
 
    private:
     CameraPerspective perspective_;

@@ -20,18 +20,18 @@ struct Instance {
     glm::mat4 model;
 };
 
-Renderable GenerateRenderable(gsl::span<const Vertex> vertices, gsl::span<const unsigned short> indices);
+Renderable GenerateRenderable(const opengl::GLShader& shader, gsl::span<const Vertex> vertices,
+                              gsl::span<const unsigned short> indices);
 
-RenderableInstanced GenerateRenderableInstanced(gsl::span<const Vertex> vertices,
-                                                gsl::span<const unsigned short> indices,
-                                                gsl::span<const Instance> instances);
+RenderableInstanced GenerateRenderableInstanced(const opengl::GLShader& shader, gsl::span<const Vertex> vertices,
+                                                gsl::span<const unsigned short> indices, gsl::span<const Instance> instances);
 
 /**************************************************************************************************/
 
 // Move this to a Painter/Designer of common polygons
 // The painter should be by Draw mode (triangles, triangles strip, etc) because of the indices.
 
-Renderable GenerateQuad()
+Renderable GenerateQuad(const opengl::GLShader& shader)
 {
     static constexpr Vertex vertices[] = {
         // clang-format off
@@ -45,12 +45,12 @@ Renderable GenerateQuad()
         0, 1, 2,  //
         2, 1, 3,  //
     };
-    return GenerateRenderable(vertices, indices);
+    return GenerateRenderable(shader, vertices, indices);
 }
 
 /**************************************************************************************************/
 
-Renderable GenerateCube()
+Renderable GenerateCube(const opengl::GLShader& shader)
 {
     // (-1,+1)       (+1,+1)
     //  Y ^ - - - - - - o
@@ -84,12 +84,12 @@ Renderable GenerateCube()
         4, 5, 0, 0, 5, 1,  // Left
         6, 7, 2, 2, 7, 3,  // Right
     };
-    return GenerateRenderable(vertices, indices);
+    return GenerateRenderable(shader, vertices, indices);
 }
 
 /**************************************************************************************************/
 
-RenderableInstanced GenerateCubeInstanced(unsigned int rows, unsigned int cols)
+RenderableInstanced GenerateCubeInstanced(const opengl::GLShader& shader, unsigned int rows, unsigned int cols)
 {
     static constexpr Vertex vertices[] = {
         // clang-format off
@@ -125,12 +125,13 @@ RenderableInstanced GenerateCubeInstanced(unsigned int rows, unsigned int cols)
             };
         }
     }
-    return GenerateRenderableInstanced(vertices, indices, instances);
+    return GenerateRenderableInstanced(shader, vertices, indices, instances);
 }
 
 /**************************************************************************************************/
 
-Renderable GenerateRenderable(gsl::span<const Vertex> vertices, gsl::span<const unsigned short> indices)
+Renderable GenerateRenderable(const opengl::GLShader& shader, gsl::span<const Vertex> vertices,
+                              gsl::span<const unsigned short> indices)
 {
     ASSERT(indices.size() <= std::numeric_limits<unsigned short>::max());
 
@@ -138,12 +139,12 @@ Renderable GenerateRenderable(gsl::span<const Vertex> vertices, gsl::span<const 
     glBindVertexArray(renderable.vao);
     glBindBuffer(GL_ARRAY_BUFFER, renderable.vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size_bytes(), vertices.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(ShaderVertexAttrib::Position.location(), 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    glEnableVertexAttribArray(shader.attr_loc(opengl::GLAttr::POSITION));
+    glVertexAttribPointer(shader.attr_loc(opengl::GLAttr::POSITION), 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                           (void*) offsetof(Vertex, position));
-    glEnableVertexAttribArray(ShaderVertexAttrib::Position.location());
-    glVertexAttribPointer(ShaderVertexAttrib::Color.location(), 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    glEnableVertexAttribArray(shader.attr_loc(opengl::GLAttr::COLOR));
+    glVertexAttribPointer(shader.attr_loc(opengl::GLAttr::COLOR), 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                           (void*) offsetof(Vertex, color));
-    glEnableVertexAttribArray(ShaderVertexAttrib::Color.location());
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, renderable.ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size_bytes(), indices.data(), GL_STATIC_DRAW);
     return renderable;
@@ -151,36 +152,33 @@ Renderable GenerateRenderable(gsl::span<const Vertex> vertices, gsl::span<const 
 
 /**************************************************************************************************/
 
-RenderableInstanced GenerateRenderableInstanced(gsl::span<const Vertex> vertices,
-                                                gsl::span<const unsigned short> indices,
-                                                gsl::span<const Instance> instances)
+RenderableInstanced GenerateRenderableInstanced(const opengl::GLShader& shader, gsl::span<const Vertex> vertices,
+                                                gsl::span<const unsigned short> indices, gsl::span<const Instance> instances)
 {
     ASSERT(indices.size() <= std::numeric_limits<unsigned short>::max());
     ASSERT(instances.size() <= std::numeric_limits<unsigned int>::max());
 
-    RenderableInstanced renderable{ static_cast<unsigned short>(indices.size()),
-                                    static_cast<unsigned int>(instances.size()) };
+    RenderableInstanced renderable{ static_cast<unsigned short>(indices.size()), static_cast<unsigned int>(instances.size()) };
 
     glBindVertexArray(renderable.vao);
 
     glBindBuffer(GL_ARRAY_BUFFER, renderable.vbo);
     glBufferData(GL_ARRAY_BUFFER, vertices.size_bytes(), vertices.data(), GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(ShaderVertexAttrib::Position.location());
-    glVertexAttribPointer(ShaderVertexAttrib::Position.location(), 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    glEnableVertexAttribArray(shader.attr_loc(opengl::GLAttr::POSITION));
+    glVertexAttribPointer(shader.attr_loc(opengl::GLAttr::POSITION), 3, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                           (void*) offsetof(Vertex, position));
-    glEnableVertexAttribArray(ShaderVertexAttrib::Color.location());
-    glVertexAttribPointer(ShaderVertexAttrib::Color.location(), 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
+    glEnableVertexAttribArray(shader.attr_loc(opengl::GLAttr::COLOR));
+    glVertexAttribPointer(shader.attr_loc(opengl::GLAttr::COLOR), 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
                           (void*) offsetof(Vertex, color));
 
     glBindBuffer(GL_ARRAY_BUFFER, renderable.ibo);
     glBufferData(GL_ARRAY_BUFFER, instances.size_bytes(), instances.data(), GL_STATIC_DRAW);
 
     for (unsigned index : { 0, 1, 2, 3 }) {
-        const unsigned location = ShaderVertexAttrib::Model0.location() + index;
+        const unsigned location = shader.attr_loc(opengl::GLAttr::MODEL) + index;
         glEnableVertexAttribArray(location);
-        glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4),
-                              (void*) (index * sizeof(glm::mat4::col_type)));
+        glVertexAttribPointer(location, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*) (index * sizeof(glm::mat4::col_type)));
         glVertexAttribDivisor(location, 1);
     }
 

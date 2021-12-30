@@ -41,6 +41,8 @@ struct ShaderObjArray {
 GLShader::GLShader(std::string name) : name_(std::move(name)), id_(glCreateProgram())
 {
     TRACE("New GLShader program '{}' [{}]", name_, id_);
+    // Workaround for std::string SSO when Scoped (move does not work)
+    name_.reserve(sizeof(std::string) + 1);
 }
 
 GLShader::~GLShader()
@@ -81,7 +83,11 @@ void GLShader::load_attr_loc(const std::initializer_list<GLAttrInfo>& list)
             auto attr_name = std::get<std::string_view>(item.loc_name);
             const GLint new_loc = glGetAttribLocation(id_, attr_name.data());
             if (new_loc == -1) {
-                ERROR("Failed to get location for attr '{}' from GLShader '{}' [{}]", attr_name, name_, id_);
+                CRITICAL("Failed to get location for attribute '{}' from GLShader '{}' [{}]", attr_name, name_, id_);
+                std::abort();
+            }
+            else {
+                TRACE("Read attribute '{}' location {}, from GLShader '{}' [{}]", attr_name, new_loc, name_, id_);
             }
             attrs[static_cast<size_t>(item.attr)] = new_loc;
         }
@@ -98,7 +104,11 @@ void GLShader::load_unif_loc(const std::initializer_list<GLUnifInfo>& list)
             auto unif_name = std::get<std::string_view>(item.loc_name);
             const GLint new_loc = glGetUniformLocation(id_, unif_name.data());
             if (new_loc == -1) {
-                ERROR("Failed to get location for uniform '{}' from GLShader '{}' [{}]", unif_name, name_, id_);
+                CRITICAL("Failed to get location for uniform '{}' from GLShader '{}' [{}]", unif_name, name_, id_);
+                std::abort();
+            }
+            else {
+                TRACE("Read uniform '{}' location {}, from GLShader '{}' [{}]", unif_name, new_loc, name_, id_);
             }
             unifs[static_cast<size_t>(item.unif)] = new_loc;
         }

@@ -5,9 +5,9 @@
 
 namespace firstgame::util::filesystem_literals {
 
-std::filesystem::path operator"" _path(const char* str, size_t len)
+inline static std::filesystem::path operator"" _path(const char* str, size_t len)
 {
-    return std::filesystem::path(str, str + len);
+    return { str, str + len };
 }
 
 }  // namespace firstgame::util::filesystem_literals

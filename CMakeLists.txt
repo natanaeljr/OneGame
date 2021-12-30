@@ -88,6 +88,7 @@ target_sources(FirstGame PRIVATE
     src/firstgame/render/renderer.cpp
     src/firstgame/render/painter.cpp
     src/firstgame/render/camera_system.cpp
+    src/firstgame/render/shader_lib.cpp
     src/firstgame/system/asset_mgr.cpp
     src/firstgame/opengl/shader.cpp
 )
